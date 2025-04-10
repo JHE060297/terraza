@@ -1,0 +1,93 @@
+<div class="user-detail-container">
+    <div class="page-header">
+        <div class="header-title">
+            <h1>Detalle de Usuario</h1>
+            <p *ngIf="user">{{ user.nombre }} {{ user.apellido }}</p>
+        </div>
+        <div class="header-actions">
+            <button mat-button color="primary" (click)="goBack()">
+                <mat-icon>arrow_back</mat-icon> Volver
+            </button>
+        </div>
+    </div>
+
+    <!-- Mensaje de error -->
+    <div *ngIf="error" class="error-message">
+        {{ error }}
+    </div>
+
+    <!-- Indicador de carga -->
+    <div *ngIf="isLoading" class="loading-container">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Cargando usuario...</p>
+    </div>
+
+    <!-- Detalles del usuario -->
+    <div *ngIf="!isLoading && user" class="user-detail-content">
+        <mat-card>
+            <mat-card-header>
+                <mat-icon mat-card-avatar>account_circle</mat-icon>
+                <mat-card-title>{{ user.nombre }} {{ user.apellido }}</mat-card-title>
+                <mat-card-subtitle>{{ getRoleName(user.id_rol) }}</mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content>
+                <div class="detail-section">
+                    <h3>Información Básica</h3>
+
+                    <div class="detail-row">
+                        <span class="detail-label">ID:</span>
+                        <span class="detail-value">{{ user.id_usuario }}</span>
+                    </div>
+
+                    <div class="detail-row">
+                        <span class="detail-label">Nombre:</span>
+                        <span class="detail-value">{{ user.nombre }}</span>
+                    </div>
+
+                    <div class="detail-row">
+                        <span class="detail-label">Apellido:</span>
+                        <span class="detail-value">{{ user.apellido }}</span>
+                    </div>
+
+                    <div class="detail-row">
+                        <span class="detail-label">Usuario:</span>
+                        <span class="detail-value">{{ user.usuario }}</span>
+                    </div>
+                </div>
+
+                <mat-divider></mat-divider>
+
+                <div class="detail-section">
+                    <h3>Rol y Sucursal</h3>
+
+                    <div class="detail-row">
+                        <span class="detail-label">Rol:</span>
+                        <span class="detail-value">{{ getRoleName(user.id_rol) }}</span>
+                    </div>
+
+                    <div class="detail-row">
+                        <span class="detail-label">Sucursal:</span>
+                        <span class="detail-value">{{ getBranchName(user.id_sucursal) }}</span>
+                    </div>
+                </div>
+
+                <mat-divider></mat-divider>
+
+                <div class="detail-section">
+                    <h3>Información del Sistema</h3>
+                </div>
+            </mat-card-content>
+
+            <mat-card-actions>
+                <button mat-button color="primary" (click)="editUser()">
+                    <mat-icon>edit</mat-icon> Editar
+                </button>
+
+                <button mat-button color="warn" (click)="deleteUser()">
+                    <mat-icon>delete</mat-icon> Eliminar
+                </button>
+            </mat-card-actions>
+        </mat-card>
+    </div>
+</div>

@@ -1,0 +1,122 @@
+.app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.app-toolbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 2;
+}
+
+.app-name {
+    margin-left: 8px;
+}
+
+.sidenav-container {
+    flex: 1;
+    margin-top: 64px; // altura del toolbar
+}
+
+// Contenedor sin navbar para páginas como login
+.sidenav-container.login-container {
+    margin-top: 0; // Sin margen cuando no hay toolbar
+}
+
+.app-sidenav {
+    width: 250px;
+    box-shadow: 3px 0 6px rgba(0, 0, 0, .1);
+}
+
+.main-content {
+    padding: 20px;
+    background-color: #f5f5f5;
+}
+
+// Contenido sin navbar
+.main-content.without-navbar {
+    padding: 0; // Sin padding cuando no hay navbar
+    background-color: transparent; // Fondo transparente para páginas como login
+    height: 100vh; // Altura completa de la ventana
+}
+
+.content-wrapper {
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.spacer {
+    flex: 1 1 auto;
+}
+
+.user-menu-button {
+    display: flex;
+    align-items: center;
+
+    .username {
+        margin: 0 8px;
+    }
+}
+
+.user-info-box {
+    padding: 16px;
+
+    .user-info {
+        display: flex;
+        align-items: center;
+
+        mat-icon {
+            font-size: 40px;
+            height: 40px;
+            width: 40px;
+            margin-right: 12px;
+        }
+
+        .user-details {
+            .user-name {
+                font-weight: 500;
+            }
+
+            .user-role {
+                font-size: 12px;
+                color: rgba(0, 0, 0, 0.6);
+            }
+        }
+    }
+}
+
+.active-link {
+    background-color: rgba(63, 81, 181, 0.12);
+    color: #3f51b5;
+}
+
+/* Responsive para dispositivos móviles */
+@media (max-width: 600px) {
+    .sidenav-container {
+        margin-top: 56px; // altura del toolbar en móvil
+    }
+
+    .sidenav-container.login-container {
+        margin-top: 0; // Sin margen cuando no hay toolbar
+    }
+
+    .app-sidenav {
+        width: 200px;
+    }
+
+    .main-content {
+        padding: 10px;
+    }
+
+    .main-content.without-navbar {
+        padding: 0;
+    }
+
+    .username {
+        display: none;
+    }
+}

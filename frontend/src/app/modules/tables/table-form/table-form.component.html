@@ -1,0 +1,73 @@
+<!-- src/app/modules/branches/table-form/table-form.component.html -->
+
+<div class="table-form-container">
+    <div class="page-header">
+        <h1>{{ isNewTable ? 'Crear Nueva Mesa' : 'Editar Mesa' }}</h1>
+        <p *ngIf="branch">{{ branch.nombre_sucursal }}</p>
+    </div>
+
+    <mat-card>
+        <mat-card-content>
+            <!-- Mensaje de error -->
+            <div *ngIf="error" class="error-message">
+                {{ error }}
+            </div>
+
+            <!-- Indicador de carga -->
+            <div *ngIf="isLoading" class="loading-container">
+                <mat-spinner diameter="40"></mat-spinner>
+                <p>Cargando datos...</p>
+            </div>
+
+            <!-- Formulario -->
+            <form *ngIf="!isLoading" [formGroup]="tableForm" (ngSubmit)="onSubmit()" class="table-form">
+                <!-- Número de mesa -->
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Número de Mesa</mat-label>
+                    <input matInput formControlName="numero" placeholder="Ingrese el número de mesa" type="number"
+                        min="1">
+                    <mat-error *ngIf="tableForm.get('numero')?.hasError('required')">
+                        El número de mesa es requerido
+                    </mat-error>
+                    <mat-error *ngIf="tableForm.get('numero')?.hasError('min')">
+                        El número de mesa debe ser mayor a 0
+                    </mat-error>
+                </mat-form-field>
+
+                <!-- Estado -->
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Estado</mat-label>
+                    <mat-select formControlName="estado">
+                        <mat-option value="libre">Libre</mat-option>
+                        <mat-option value="ocupada">Ocupada</mat-option>
+                        <mat-option value="pagado">Pagado</mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="tableForm.get('estado')?.hasError('required')">
+                        El estado es requerido
+                    </mat-error>
+                </mat-form-field>
+
+                <!-- Mesa activa -->
+                <div class="form-row checkbox-row">
+                    <mat-checkbox formControlName="is_active" color="primary">
+                        Mesa activa
+                    </mat-checkbox>
+                </div>
+
+                <!-- Botones de acción -->
+                <div class="form-actions">
+                    <button type="button" mat-button (click)="onCancel()" [disabled]="isSubmitting">
+                        Cancelar
+                    </button>
+                    <button type="submit" mat-raised-button color="primary"
+                        [disabled]="tableForm.invalid || isSubmitting">
+                        <mat-icon *ngIf="isSubmitting">
+                            <mat-spinner diameter="20"></mat-spinner>
+                        </mat-icon>
+                        <span *ngIf="!isSubmitting">{{ isNewTable ? 'Crear Mesa' : 'Actualizar Mesa' }}</span>
+                    </button>
+                </div>
+            </form>
+        </mat-card-content>
+    </mat-card>
+</div>

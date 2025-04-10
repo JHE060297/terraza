@@ -1,0 +1,45 @@
+<mat-card class="widget-card">
+    <mat-card-header>
+        <mat-icon mat-card-avatar class="widget-icon">warning</mat-icon>
+        <mat-card-title>Productos con Bajo Stock</mat-card-title>
+        <mat-card-subtitle>Productos que requieren reposición</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+        <!-- Mensaje de error -->
+        <div *ngIf="error" class="error-message">
+            {{ error }}
+        </div>
+
+        <!-- Indicador de carga -->
+        <div *ngIf="isLoading" class="loading-container">
+            <mat-spinner diameter="20"></mat-spinner>
+            <span>Cargando...</span>
+        </div>
+
+        <!-- Lista de productos con bajo stock -->
+        <mat-list *ngIf="!isLoading" class="low-stock-list">
+            <div *ngIf="lowStockItems.length === 0" class="no-items-message">
+                <mat-icon>check_circle</mat-icon>
+                <span>No hay productos con bajo stock</span>
+            </div>
+
+            <mat-list-item *ngFor="let item of lowStockItems">
+                <div class="list-item-content">
+                    <div class="item-info">
+                        <span class="item-name">{{ item.nombre_producto }}</span>
+                        <span class="item-branch">{{ item.nombre_sucursal }}</span>
+                    </div>
+                    <div class="item-stock">
+                        <span class="stock-value">{{ item.cantidad }}</span>
+                        <span class="stock-threshold">(Min: {{ item.alerta }})</span>
+                    </div>
+                </div>
+            </mat-list-item>
+        </mat-list>
+    </mat-card-content>
+
+    <mat-card-actions>
+        <button mat-button color="primary" (click)="viewInventory()">Ver Inventario</button>
+    </mat-card-actions>
+</mat-card>

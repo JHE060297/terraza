@@ -1,0 +1,82 @@
+<div class="tables-list-container">
+    <div class="page-header">
+        <div class="header-title">
+            <h1 *ngIf="branch">Mesas de {{ branch.nombre_sucursal }}</h1>
+            <p *ngIf="branch">Gestión de mesas de la sucursal</p>
+        </div>
+        <div class="header-actions">
+            <button mat-button color="primary" (click)="goBack()">
+                <mat-icon>arrow_back</mat-icon> Volver a Sucursales
+            </button>
+            <button mat-raised-button color="primary" (click)="addTable()" *ngIf="isAdmin">
+                <mat-icon>add</mat-icon> Nueva Mesa
+            </button>
+        </div>
+    </div>
+
+    <!-- Mensaje de error -->
+    <div *ngIf="error" class="error-message">
+        {{ error }}
+    </div>
+
+    <!-- Indicador de carga -->
+    <div *ngIf="isLoading" class="loading-container">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Cargando mesas...</p>
+    </div>
+
+    <!-- Filtros -->
+    <mat-card *ngIf="!isLoading && tables.length > 0">
+        <mat-card-content>
+            <div class="filters-container">
+                <mat-checkbox [(ngModel)]="showInactiveTables" (change)="toggleInactiveTables()">
+                    Mostrar mesas inactivas
+                </mat-checkbox>
+            </div>
+        </mat-card-content>
+    </mat-card>
+
+    <!-- Sin mesas -->
+    <div *ngIf="!isLoading && tables.length === 0" class="no-tables-message">
+        <mat-icon>table_restaurant</mat-icon>
+        <p>No hay mesas disponibles para esta sucursal</p>
+        <button mat-raised-button color="primary" (click)="addTable()" *ngIf="isAdmin">
+            <mat-icon>add</mat-icon> Crear Nueva Mesa
+        </button>
+    </div>
+
+    <!-- Grid de mesas -->
+    <div *ngIf="!isLoading && tables.length > 0" class="tables-grid">
+        <mat-card *ngFor="let table of tables" class="table-card" [ngClass]="{'inactive-table': !table.is_active}">
+            <mat-card-header>
+                <div mat-card-avatar class="table-icon">
+                    <mat-icon>table_restaurant</mat-icon>
+                </div>
+                <mat-card-title>Mesa {{ table.numero }}</mat-card-title>
+                <mat-card-subtitle>
+                    <span [ngClass]="getTableStatusClass(table.estado)">
+                        {{ getTableStatusLabel(table.estado) }}
+                    </span>
+                    <span *ngIf="!table.is_active" class="inactive-label"> (Inactiva)</span>
+                </mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-actions>
+                <button mat-button color="primary" (click)="viewTableDetail(table)">
+                    <mat-icon>visibility</mat-icon> Ver Pedidos
+                </button>
+                <button mat-button color="accent" (click)="editTable(table)" *ngIf="isAdmin">
+                    <mat-icon>edit</mat-icon> Editar
+                </button>
+                <button mat-button [color]="table.is_active ? 'warn' : 'accent'" (click)="toggleTableActive(table)"
+                    *ngIf="isAdmin">
+                    <mat-icon>{{ table.is_active ? 'visibility_off' : 'visibility' }}</mat-icon>
+                    {{ table.is_active ? 'Desactivar' : 'Activar' }}
+                </button>
+                <button mat-button color="warn" (click)="deleteTable(table)" *ngIf="isAdmin">
+                    <mat-icon>delete</mat-icon> Eliminar
+                </button>
+            </mat-card-actions>
+        </mat-card>
+    </div>
+</div>

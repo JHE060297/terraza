@@ -1,0 +1,131 @@
+<div class="dashboard-container">
+    <div class="page-header">
+        <h1>Dashboard</h1>
+        <p *ngIf="currentUser">Bienvenido, {{currentUser.nombre}} {{currentUser.apellido}}</p>
+    </div>
+
+    <!-- Tarjetas de resumen -->
+    <div class="dashboard-cards">
+        <!-- Tarjeta de pedidos pendientes - visible para todos -->
+        <mat-card class="dashboard-card">
+            <mat-card-content>
+                <div class="card-icon-container pending">
+                    <mat-icon>receipt</mat-icon>
+                </div>
+                <div class="card-data">
+                    <div class="card-value">{{dashboardCards.pendingOrders}}</div>
+                    <div class="card-label">Pedidos Pendientes</div>
+                </div>
+            </mat-card-content>
+            <mat-card-actions>
+                <a mat-button color="primary" routerLink="/orders">Ver Pedidos</a>
+            </mat-card-actions>
+        </mat-card>
+
+        <!-- Tarjeta de ventas diarias - solo admin y cajero -->
+        <mat-card class="dashboard-card" *ngIf="isAdmin || isCajero">
+            <mat-card-content>
+                <div class="card-icon-container sales">
+                    <mat-icon>payments</mat-icon>
+                </div>
+                <div class="card-data">
+                    <div class="card-value">${{dashboardCards.dailySales | number}}</div>
+                    <div class="card-label">Ventas Hoy</div>
+                </div>
+            </mat-card-content>
+            <mat-card-actions>
+                <a mat-button color="primary" routerLink="/reports">Ver Reportes</a>
+            </mat-card-actions>
+        </mat-card>
+
+        <!-- Tarjeta de mesas disponibles - visible para todos -->
+        <mat-card class="dashboard-card">
+            <mat-card-content>
+                <div class="card-icon-container available">
+                    <mat-icon>table_restaurant</mat-icon>
+                </div>
+                <div class="card-data">
+                    <div class="card-value">{{dashboardCards.availableTables}}</div>
+                    <div class="card-label">Mesas Disponibles</div>
+                </div>
+            </mat-card-content>
+            <mat-card-actions>
+                <a mat-button color="primary" routerLink="/tables">Ver Mesas</a>
+            </mat-card-actions>
+        </mat-card>
+
+        <!-- Tarjeta de productos con bajo stock - solo admin y cajero -->
+        <mat-card class="dashboard-card" *ngIf="isAdmin || isCajero">
+            <mat-card-content>
+                <div class="card-icon-container warning">
+                    <mat-icon>inventory</mat-icon>
+                </div>
+                <div class="card-data">
+                    <div class="card-value">{{dashboardCards.lowStockItems}}</div>
+                    <div class="card-label">Productos con Bajo Stock</div>
+                </div>
+            </mat-card-content>
+            <mat-card-actions>
+                <a mat-button color="primary" routerLink="/inventory">Ver Inventario</a>
+            </mat-card-actions>
+        </mat-card>
+    </div>
+
+    <!-- Sección de widgets -->
+    <div class="dashboard-widgets" *ngIf="isAdmin || isCajero">
+        <div class="row">
+            <!-- Widget de productos con bajo stock -->
+            <div class="widget-container">
+                <app-low-stock-widget [limit]="5"></app-low-stock-widget>
+            </div>
+
+            <!-- Aquí puedes añadir más widgets en el futuro -->
+        </div>
+    </div>
+
+    <!-- Accesos rápidos -->
+    <div class="quick-access-section">
+        <h2>Acciones Rápidas</h2>
+
+        <div class="quick-access-buttons">
+            <!-- Para Meseros -->
+            <ng-container *ngIf="isMesero || isAdmin">
+                <button mat-raised-button color="primary" routerLink="/orders/new">
+                    <mat-icon>add_shopping_cart</mat-icon>
+                    Nuevo Pedido
+                </button>
+            </ng-container>
+
+            <!-- Para Cajeros -->
+            <ng-container *ngIf="isCajero || isAdmin">
+                <button mat-raised-button color="accent" routerLink="/payments/new">
+                    <mat-icon>point_of_sale</mat-icon>
+                    Procesar Pago
+                </button>
+
+                <button mat-raised-button color="primary" routerLink="/inventory">
+                    <mat-icon>edit</mat-icon>
+                    Ajustar Inventario
+                </button>
+            </ng-container>
+
+            <!-- Para Administradores -->
+            <ng-container *ngIf="isAdmin">
+                <button mat-raised-button color="primary" routerLink="/reports/new">
+                    <mat-icon>assessment</mat-icon>
+                    Generar Reporte
+                </button>
+
+                <button mat-raised-button color="primary" routerLink="/products/new">
+                    <mat-icon>add_circle</mat-icon>
+                    Nuevo Producto
+                </button>
+
+                <button mat-raised-button color="primary" routerLink="/users/new">
+                    <mat-icon>person_add</mat-icon>
+                    Nuevo Usuario
+                </button>
+            </ng-container>
+        </div>
+    </div>
+</div>

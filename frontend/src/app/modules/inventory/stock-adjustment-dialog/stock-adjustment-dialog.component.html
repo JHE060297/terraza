@@ -1,0 +1,44 @@
+<h2 mat-dialog-title>Ajustar Inventario</h2>
+<div mat-dialog-content>
+    <p>Producto: <strong>{{ data.inventoryItem.nombre_producto }}</strong></p>
+    <p>Sucursal: <strong>{{ data.inventoryItem.nombre_sucursal }}</strong></p>
+    <p>Stock actual: <strong>{{ data.inventoryItem.cantidad }}</strong></p>
+
+    <form [formGroup]="adjustmentForm" class="adjustment-form">
+        <div class="form-field">
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Tipo de transacción</mat-label>
+                <mat-select formControlName="tipo_transaccion">
+                    <mat-option value="compra">Compra</mat-option>
+                    <mat-option value="venta ">Venta</mat-option>
+                    <mat-option value="ajuste">Ajuste</mat-option>
+                    <mat-option value="transferencia">Transferencia</mat-option>
+                </mat-select>
+                <mat-error *ngIf="adjustmentForm.get('tipo_transaccion')?.hasError('required')">
+                    El tipo de transacción es requerido
+                </mat-error>
+            </mat-form-field>
+        </div>
+
+        <div class="form-field">
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Cantidad</mat-label>
+                <input matInput type="number" formControlName="cantidad"
+                    placeholder="Ingrese la cantidad (+ para añadir, - para restar)">
+                <mat-hint>Ingrese un número positivo para añadir o negativo para restar stock</mat-hint>
+                <mat-error *ngIf="adjustmentForm.get('cantidad')?.hasError('required')">
+                    La cantidad es requerida
+                </mat-error>
+                <mat-error *ngIf="adjustmentForm.get('cantidad')?.hasError('negativeStock')">
+                    La cantidad resultante no puede ser negativa
+                </mat-error>
+            </mat-form-field>
+        </div>
+    </form>
+</div>
+<div mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()">Cancelar</button>
+    <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="adjustmentForm.invalid">
+        Guardar Ajuste
+    </button>
+</div>

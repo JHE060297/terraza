@@ -1,0 +1,95 @@
+.widget-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.widget-icon {
+    background-color: #ff9800;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.loading-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+
+    span {
+        margin-left: 8px;
+        color: #666;
+    }
+}
+
+.error-message {
+    color: #f44336;
+    padding: 8px;
+    background-color: #ffebee;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.low-stock-list {
+    padding: 0;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.no-items-message {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    color: #4caf50;
+
+    mat-icon {
+        margin-right: 8px;
+    }
+}
+
+.list-item-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.item-info {
+    display: flex;
+    flex-direction: column;
+
+    .item-name {
+        font-weight: 500;
+    }
+
+    .item-branch {
+        font-size: 12px;
+        color: #666;
+    }
+}
+
+.item-stock {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+
+    .stock-value {
+        font-weight: 500;
+        color: #f44336;
+    }
+
+    .stock-threshold {
+        font-size: 12px;
+        color: #666;
+    }
+}
+
+mat-card-actions {
+    margin-top: auto;
+    display: flex;
+    justify-content: flex-end;
+}

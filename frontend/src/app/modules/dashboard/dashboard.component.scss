@@ -1,0 +1,145 @@
+.dashboard-container {
+    padding: 16px;
+}
+
+.page-header {
+    margin-bottom: 32px;
+
+    h1 {
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #333;
+    }
+
+    p {
+        color: #666;
+        margin: 0;
+    }
+}
+
+.dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 24px;
+    margin-bottom: 40px;
+}
+
+.dashboard-card {
+    transition: transform 0.3s, box-shadow 0.3s;
+
+    &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    mat-card-content {
+        display: flex;
+        align-items: center;
+        padding: 16px;
+    }
+
+    .card-icon-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        margin-right: 16px;
+
+        mat-icon {
+            font-size: 30px;
+            height: 30px;
+            width: 30px;
+            color: white;
+        }
+
+        &.pending {
+            background-color: #ff9800; // Naranja
+        }
+
+        &.sales {
+            background-color: #4caf50; // Verde
+        }
+
+        &.available {
+            background-color: #2196f3; // Azul
+        }
+
+        &.warning {
+            background-color: #f44336; // Rojo
+        }
+    }
+
+    .card-data {
+        .card-value {
+            font-size: 24px;
+            font-weight: 500;
+            line-height: 1.2;
+        }
+
+        .card-label {
+            color: #666;
+            font-size: 14px;
+        }
+    }
+
+    mat-card-actions {
+        padding: 8px 16px 16px;
+        display: flex;
+        justify-content: flex-end;
+    }
+}
+
+.dashboard-widgets {
+    margin-bottom: 40px;
+
+    .row {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+        gap: 24px;
+    }
+
+    .widget-container {
+        min-height: 300px;
+    }
+}
+
+.quick-access-section {
+    h2 {
+        margin-bottom: 16px;
+        font-weight: 500;
+        color: #333;
+    }
+}
+
+.quick-access-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+
+    button {
+        mat-icon {
+            margin-right: 8px;
+        }
+    }
+}
+
+/* Responsive */
+@media (max-width: 599px) {
+    .dashboard-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-widgets .row {
+        grid-template-columns: 1fr;
+    }
+
+    .quick-access-buttons {
+        flex-direction: column;
+
+        button {
+            width: 100%;
+        }
+    }
+}

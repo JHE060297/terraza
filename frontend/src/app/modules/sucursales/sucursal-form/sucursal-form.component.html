@@ -1,0 +1,71 @@
+<!-- src/app/modules/branches/sucursal-form/sucursal-form.component.html -->
+
+<div class="branch-form-container">
+    <div class="page-header">
+        <h1>{{ isNewBranch ? 'Crear Nueva Sucursal' : 'Editar Sucursal' }}</h1>
+        <p>{{ isNewBranch ? 'Complete el formulario para crear una nueva sucursal' : 'Modifique los datos de la
+            sucursal' }}</p>
+    </div>
+
+    <mat-card>
+        <mat-card-content>
+            <!-- Mensaje de error -->
+            <div *ngIf="error" class="error-message">
+                {{ error }}
+            </div>
+
+            <!-- Indicador de carga -->
+            <div *ngIf="isLoading" class="loading-container">
+                <mat-spinner diameter="40"></mat-spinner>
+                <p>Cargando datos...</p>
+            </div>
+
+            <!-- Formulario -->
+            <form *ngIf="!isLoading" [formGroup]="branchForm" (ngSubmit)="onSubmit()" class="branch-form">
+                <!-- Nombre -->
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Nombre de la Sucursal</mat-label>
+                    <input matInput formControlName="nombre_sucursal" placeholder="Ingrese el nombre de la sucursal">
+                    <mat-error *ngIf="branchForm.get('nombre_sucursal')?.hasError('required')">
+                        El nombre es requerido
+                    </mat-error>
+                </mat-form-field>
+
+                <!-- Dirección -->
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Dirección</mat-label>
+                    <input matInput formControlName="direccion" placeholder="Ingrese la dirección">
+                    <mat-error *ngIf="branchForm.get('direccion')?.hasError('required')">
+                        La dirección es requerida
+                    </mat-error>
+                </mat-form-field>
+
+                <!-- Teléfono -->
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Teléfono</mat-label>
+                    <input matInput formControlName="telefono" placeholder="Ingrese el teléfono">
+                    <mat-error *ngIf="branchForm.get('telefono')?.hasError('required')">
+                        El teléfono es requerido
+                    </mat-error>
+                    <mat-error *ngIf="branchForm.get('telefono')?.hasError('pattern')">
+                        Ingrese un número de teléfono válido
+                    </mat-error>
+                </mat-form-field>
+
+                <!-- Botones de acción -->
+                <div class="form-actions">
+                    <button type="button" mat-button (click)="onCancel()" [disabled]="isSubmitting">
+                        Cancelar
+                    </button>
+                    <button type="submit" mat-raised-button color="primary"
+                        [disabled]="branchForm.invalid || isSubmitting">
+                        <mat-icon *ngIf="isSubmitting">
+                            <mat-spinner diameter="20"></mat-spinner>
+                        </mat-icon>
+                        <span *ngIf="!isSubmitting">{{ isNewBranch ? 'Crear Sucursal' : 'Actualizar Sucursal' }}</span>
+                    </button>
+                </div>
+            </form>
+        </mat-card-content>
+    </mat-card>
+</div>

@@ -1,0 +1,85 @@
+# === BACKEND ===
+# Entorno virtual
+/venv/
+/env/
+/.venv/
+/ENV/
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Prisma
+prisma/dev.db
+prisma/dev.db-journal
+
+# Archivos de entorno
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env.example
+
+# Directorio de construcción
+dist/
+build/
+
+# Directorio de uploads
+uploads/
+
+# Logs
+logs/
+*.log
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Editores
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Prisma
+prisma/migrations/ # Migraciones de Prisma (opcional)
+
+# === FRONTEND ===
+# Node modules
+Frontend/node_modules/
+
+# Build y temporales
+Frontend/dist/
+Frontend/.vite/
+Frontend/.next/
+Frontend/.nuxt/
+Frontend/build/
+Frontend/.cache/
+Frontend/.turbo/
+
+# Archivos de entorno
+Frontend/.env
+Frontend/.env.*
+
+# Sistema operativo y editores
+Frontend/.DS_Store
+Frontend/Thumbs.db
+
+# Logs
+Frontend/npm-debug.log*
+Frontend/yarn-debug.log*
+Frontend/yarn-error.log*
+Frontend/pnpm-debug.log*
+
+# Coverage y pruebas
+Frontend/coverage/
+Frontend/jest-coverage/
+Frontend/.nyc_output/
+
+# Vite cache (específico de tu stack)
+Frontend/.vite/
+
+# Archivos de lock si no los estás usando todos (opcional según gestor)
+package-lock.json

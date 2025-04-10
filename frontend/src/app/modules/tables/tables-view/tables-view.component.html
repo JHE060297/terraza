@@ -1,0 +1,107 @@
+<div class="tables-container">
+    <div class="page-header">
+        <div class="header-title">
+            <h1>Mesas</h1>
+            <p>Gestión de mesas y pedidos</p>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <mat-card class="filters-card">
+        <mat-card-content>
+            <div class="filters-container">
+                <!-- Selector de sucursal (solo para admin) -->
+                <mat-form-field appearance="outline" *ngIf="isAdmin">
+                    <mat-label>Sucursal</mat-label>
+                    <mat-select [(ngModel)]="selectedBranchId" (selectionChange)="onBranchChange()">
+                        <mat-option *ngFor="let branch of branches" [value]="branch.id_sucursal">
+                            {{ branch.nombre_sucursal }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+                <!-- Filtro por estado -->
+                <mat-form-field appearance="outline">
+                    <mat-label>Estado</mat-label>
+                    <mat-select [(ngModel)]="statusFilter" (selectionChange)="onStatusFilterChange()">
+                        <mat-option [value]="null">Todos</mat-option>
+                        <mat-option value="libre">Libres</mat-option>
+                        <mat-option value="ocupada">Ocupadas</mat-option>
+                        <mat-option value="pagado">Pagadas</mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+                <!-- Toggle para mostrar mesas inactivas -->
+                <mat-checkbox [(ngModel)]="showInactiveTables" (change)="toggleInactiveTables()">
+                    Mostrar mesas inactivas
+                </mat-checkbox>
+
+                <!-- Botón para refrescar -->
+                <button mat-raised-button color="primary" (click)="loadData()">
+                    <mat-icon>refresh</mat-icon> Actualizar
+                </button>
+            </div>
+        </mat-card-content>
+    </mat-card>
+
+    <!-- Mensaje de error -->
+    <div *ngIf="error" class="error-message">
+        {{ error }}
+    </div>
+
+    <!-- Indicador de carga -->
+    <div *ngIf="isLoading" class="loading-container">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Cargando mesas...</p>
+    </div>
+
+    <!-- Sin mesas -->
+    <div *ngIf="!isLoading && tables.length === 0" class="no-tables-message">
+        <mat-icon>table_bar</mat-icon>
+        <p>No hay mesas disponibles para los filtros seleccionados</p>
+    </div>
+
+    <!-- Grid de mesas -->
+    <div *ngIf="!isLoading && tables.length > 0" class="tables-grid">
+        <mat-card *ngFor="let table of tables" class="table-card" [ngClass]="{'inactive-table': !table.is_active}">
+            <mat-card-header>
+                <div mat-card-avatar class="table-icon">
+                    <mat-icon>table_restaurant</mat-icon>
+                </div>
+                <mat-card-title>Mesa {{ table.numero }}</mat-card-title>
+                <mat-card-subtitle>
+                    <span [ngClass]="getTableStatusClass(table.estado)">
+                        {{ getTableStatusLabel(table.estado) }}
+                    </span>
+                </mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content>
+                <div *ngIf="hasActiveOrders(table.id_mesa)" class="order-info">
+                    <p><strong>Pedidos:</strong> {{ tableOrders[table.id_mesa].length }}</p>
+                    <p><strong>Total:</strong> {{ tableOrders[table.id_mesa][0].total | currency }}</p>
+                </div>
+            </mat-card-content>
+
+            <mat-card-actions>
+                <button mat-button color="primary" (click)="viewTableDetail(table)">
+                    <mat-icon>visibility</mat-icon> Ver
+                </button>
+
+                <button mat-button color="accent" [disabled]="table.estado !== 'libre'" (click)="createOrder(table)">
+                    <mat-icon>add_shopping_cart</mat-icon> Nuevo Pedido
+                </button>
+
+                <button mat-button color="warn" [disabled]="table.estado === 'libre' || !hasActiveOrders(table.id_mesa)"
+                    (click)="processPayment(table)" *ngIf="authService.isAdmin() || authService.isCajero()">
+                    <mat-icon>payment</mat-icon> Pagar
+                </button>
+
+                <button mat-button [disabled]="table.estado === 'libre'" (click)="freeTable(table)"
+                    *ngIf="authService.isAdmin() || authService.isCajero()">
+                    <mat-icon>check_circle</mat-icon> Liberar
+                </button>
+            </mat-card-actions>
+        </mat-card>
+    </div>
+</div>

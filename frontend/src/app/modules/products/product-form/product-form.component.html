@@ -1,0 +1,109 @@
+<div class="product-form-container">
+    <div class="page-header">
+        <h1>{{ isNewProduct ? 'Crear Nuevo Producto' : 'Editar Producto' }}</h1>
+        <p>{{ isNewProduct ? 'Complete el formulario para crear un nuevo producto' : 'Modifique los datos del producto'
+            }}</p>
+    </div>
+
+    <mat-card>
+        <mat-card-content>
+            <!-- Mensaje de error -->
+            <div *ngIf="error" class="error-message">
+                {{ error }}
+            </div>
+
+            <!-- Indicador de carga -->
+            <div *ngIf="isLoading" class="loading-container">
+                <mat-spinner diameter="40"></mat-spinner>
+                <p>Cargando datos...</p>
+            </div>
+
+            <!-- Formulario -->
+            <form *ngIf="!isLoading" [formGroup]="productForm" (ngSubmit)="onSubmit()" class="product-form">
+                <div class="form-row">
+                    <!-- Nombre del producto -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Nombre del Producto</mat-label>
+                        <input matInput formControlName="nombre_producto" placeholder="Ingrese el nombre del producto">
+                        <mat-error *ngIf="productForm.get('nombre_producto')?.hasError('required')">
+                            El nombre del producto es requerido
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                    <!-- Descripción -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Descripción</mat-label>
+                        <textarea matInput formControlName="descripcion" placeholder="Ingrese una descripción"
+                            rows="3"></textarea>
+                    </mat-form-field>
+                </div>
+
+                <div class="form-row price-row">
+                    <!-- Precio de compra -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Precio de Compra</mat-label>
+                        <input matInput type="number" formControlName="precio_compra" placeholder="0.00" min="0">
+                        <span matPrefix>$&nbsp;</span>
+                        <mat-error *ngIf="productForm.get('precio_compra')?.hasError('required')">
+                            El precio de compra es requerido
+                        </mat-error>
+                        <mat-error *ngIf="productForm.get('precio_compra')?.hasError('min')">
+                            El precio debe ser mayor o igual a 0
+                        </mat-error>
+                    </mat-form-field>
+
+                    <!-- Precio de venta -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Precio de Venta</mat-label>
+                        <input matInput type="number" formControlName="precio_venta" placeholder="0.00" min="0">
+                        <span matPrefix>$&nbsp;</span>
+                        <mat-error *ngIf="productForm.get('precio_venta')?.hasError('required')">
+                            El precio de venta es requerido
+                        </mat-error>
+                        <mat-error *ngIf="productForm.get('precio_venta')?.hasError('min')">
+                            El precio debe ser mayor o igual a 0
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Imagen -->
+                <div class="form-row image-row">
+                    <div class="image-upload">
+                        <label>Imagen del Producto</label>
+                        <input type="file" accept="image/*" (change)="onImageSelected($event)" #fileInput>
+                        <button type="button" mat-raised-button color="primary" (click)="fileInput.click()">
+                            <mat-icon>cloud_upload</mat-icon> Subir Imagen
+                        </button>
+                    </div>
+
+                    <div class="image-preview" *ngIf="imagePreview">
+                        <img [src]="imagePreview" alt="Vista previa">
+                    </div>
+                </div>
+
+                <!-- Estado activo -->
+                <div class="form-row checkbox-row">
+                    <mat-checkbox formControlName="is_active" color="primary">
+                        Producto activo
+                    </mat-checkbox>
+                </div>
+
+                <!-- Botones de acción -->
+                <div class="form-actions">
+                    <button type="button" mat-button (click)="onCancel()" [disabled]="isSubmitting">
+                        Cancelar
+                    </button>
+                    <button type="submit" mat-raised-button color="primary"
+                        [disabled]="productForm.invalid || isSubmitting">
+                        <mat-icon *ngIf="isSubmitting">
+                            <mat-spinner diameter="20"></mat-spinner>
+                        </mat-icon>
+                        <span *ngIf="!isSubmitting">{{ isNewProduct ? 'Crear Producto' : 'Actualizar Producto' }}</span>
+                    </button>
+                </div>
+            </form>
+        </mat-card-content>
+    </mat-card>
+</div>

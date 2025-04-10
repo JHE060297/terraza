@@ -1,0 +1,169 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "mysql"
+    url      = env("DATABASE_URL")
+}
+
+model Rol {
+    id_rol   Int       @id @default(autoincrement())
+    nombre   String    @unique
+    usuarios Usuario[]
+
+    @@map("rol")
+}
+
+model Sucursal {
+    id_sucursal     Int                     @id @default(autoincrement())
+    nombre_sucursal String
+    direccion       String
+    telefono        String
+    mesas           Mesa[]
+    usuarios        Usuario[]
+    inventarios     Inventario[]
+    transacciones   TransaccionInventario[]
+    reportes        Reporte[]
+
+    @@map("sucursal")
+}
+
+model Usuario {
+    id_usuario     Int                     @id @default(autoincrement())
+    nombre         String
+    apellido       String
+    usuario        String                  @unique
+    contrasena     String
+    id_rol         Int
+    id_sucursal    Int
+    rol            Rol                     @relation(fields: [id_rol], references: [id_rol])
+    sucursal       Sucursal                @relation(fields: [id_sucursal], references: [id_sucursal])
+    pedidos_mesero PedidoMesero[]
+    pagos          Pago[]
+    transacciones  TransaccionInventario[]
+    reportes       Reporte[]
+
+    @@map("usuario")
+}
+
+model Mesa {
+    id_mesa     Int      @id @default(autoincrement())
+    numero      Int
+    estado      String   @default("libre") // "libre", "ocupada", "pagado"
+    is_active   Boolean  @default(true)
+    id_sucursal Int
+    sucursal    Sucursal @relation(fields: [id_sucursal], references: [id_sucursal])
+    pedidos     Pedido[]
+
+    @@unique([numero, id_sucursal])
+    @@map("mesa")
+}
+
+model Producto {
+    id_producto     Int                     @id @default(autoincrement())
+    nombre_producto String
+    descripcion     String?
+    precio_compra   Decimal
+    precio_venta    Decimal
+    image           String?
+    is_active       Boolean                 @default(true)
+    existencias     Inventario[]
+    transacciones   TransaccionInventario[]
+    detalles_pedido DetallePedido[]
+
+    @@map("productos")
+}
+
+model Inventario {
+    id_inventario Int      @id @default(autoincrement())
+    cantidad      Int      @default(0)
+    alerta        Int      @default(2)
+    id_producto   Int
+    id_sucursal   Int
+    producto      Producto @relation(fields: [id_producto], references: [id_producto])
+    sucursal      Sucursal @relation(fields: [id_sucursal], references: [id_sucursal])
+
+    @@unique([id_sucursal, id_producto])
+    @@map("inventario")
+}
+
+model TransaccionInventario {
+    id_transaccion         Int      @id @default(autoincrement())
+    cantidad               Int
+    tipo_transaccion       String // "compra", "venta", "ajuste", "transferencia"
+    transaccion_fecha_hora DateTime @default(now())
+    id_producto            Int
+    id_sucursal            Int
+    id_usuario             Int?
+    producto               Producto @relation(fields: [id_producto], references: [id_producto])
+    sucursal               Sucursal @relation(fields: [id_sucursal], references: [id_sucursal])
+    usuario                Usuario? @relation(fields: [id_usuario], references: [id_usuario])
+
+    @@map("inventario_transaccion")
+}
+
+model Pedido {
+    id_pedido         Int             @id @default(autoincrement())
+    estado            String          @default("pendiente") // "pendiente", "entregado", "pagado"
+    total             Decimal         @default(0)
+    fecha_de_creacion DateTime        @default(now())
+    actualizado_a     DateTime        @updatedAt
+    id_mesa           Int
+    mesa              Mesa            @relation(fields: [id_mesa], references: [id_mesa])
+    detalles          DetallePedido[]
+    pedidos_mesero    PedidoMesero[]
+    pagos             Pago[]
+
+    @@map("pedido")
+}
+
+model DetallePedido {
+    id_detalle_pedido Int      @id @default(autoincrement())
+    cantidad          Int
+    precio_unitario   Decimal
+    id_pedido         Int
+    id_producto       Int
+    pedido            Pedido   @relation(fields: [id_pedido], references: [id_pedido])
+    producto          Producto @relation(fields: [id_producto], references: [id_producto])
+
+    @@map("detalle_pedido")
+}
+
+model PedidoMesero {
+    id        Int     @id @default(autoincrement())
+    id_pedido Int
+    id_mesero Int
+    pedido    Pedido  @relation(fields: [id_pedido], references: [id_pedido])
+    mesero    Usuario @relation(fields: [id_mesero], references: [id_usuario])
+
+    @@unique([id_pedido, id_mesero])
+    @@map("pedido_mesero")
+}
+
+model Pago {
+    id_pago     Int      @id @default(autoincrement())
+    monto       Decimal
+    metodo_pago String // "efectivo", "tarjeta", "nequi", "daviplata"
+    fecha_hora  DateTime @default(now())
+    id_pedido   Int
+    id_usuario  Int
+    pedido      Pedido   @relation(fields: [id_pedido], references: [id_pedido])
+    usuario     Usuario  @relation(fields: [id_usuario], references: [id_usuario])
+
+    @@map("pago")
+}
+
+model Reporte {
+    id_reporte       Int      @id @default(autoincrement())
+    fecha_generacion DateTime @default(now())
+    fecha_inicio     DateTime
+    fecha_fin        DateTime
+    formato          String // "xlsx", "csv", "pdf"
+    id_usuario       Int
+    id_sucursal      Int
+    usuario          Usuario  @relation(fields: [id_usuario], references: [id_usuario])
+    sucursal         Sucursal @relation(fields: [id_sucursal], references: [id_sucursal])
+
+    @@map("reporte")
+}

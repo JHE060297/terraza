@@ -1,0 +1,15 @@
+.adjustment-form {
+    display: flex;
+    flex-direction: column;
+    margin-top: 16px;
+    min-width: 300px;
+
+    .form-field {
+        margin-bottom: 16px;
+        width: 100%;
+    }
+
+    .full-width {
+        width: 100%;
+    }
+}

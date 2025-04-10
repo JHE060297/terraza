@@ -1,0 +1,114 @@
+<div class="user-form-container">
+    <div class="page-header">
+        <h1>{{ isNewUser ? 'Crear Nuevo Usuario' : 'Editar Usuario' }}</h1>
+        <p>{{ isNewUser ? 'Complete el formulario para crear un nuevo usuario' : 'Modifique los datos del usuario' }}
+        </p>
+    </div>
+
+    <mat-card>
+        <mat-card-content>
+            <!-- Mensaje de error -->
+            <div *ngIf="error" class="error-message">
+                {{ error }}
+            </div>
+
+            <!-- Indicador de carga -->
+            <div *ngIf="isLoading" class="loading-container">
+                <mat-spinner diameter="40"></mat-spinner>
+                <p>Cargando datos...</p>
+            </div>
+
+            <!-- Formulario -->
+            <form *ngIf="!isLoading" [formGroup]="userForm" (ngSubmit)="onSubmit()" class="user-form">
+                <div class="form-row">
+                    <!-- Nombre -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Nombre</mat-label>
+                        <input matInput formControlName="nombre" placeholder="Ingrese el nombre">
+                        <mat-error *ngIf="userForm.get('nombre')?.hasError('required')">
+                            El nombre es requerido
+                        </mat-error>
+                    </mat-form-field>
+
+                    <!-- Apellido -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Apellido</mat-label>
+                        <input matInput formControlName="apellido" placeholder="Ingrese el apellido">
+                        <mat-error *ngIf="userForm.get('apellido')?.hasError('required')">
+                            El apellido es requerido
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                    <!-- Usuario -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Usuario</mat-label>
+                        <input matInput formControlName="usuario" placeholder="Ingrese el nombre de usuario">
+                        <mat-error *ngIf="userForm.get('usuario')?.hasError('required')">
+                            El usuario es requerido
+                        </mat-error>
+                    </mat-form-field>
+
+                    <!-- Contraseña -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Contraseña</mat-label>
+                        <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password"
+                            placeholder="{{ isNewUser ? 'Ingrese la contraseña' : 'Cambiar contraseña (opcional)' }}">
+                        <button type="button" mat-icon-button matSuffix (click)="hidePassword = !hidePassword">
+                            <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+                        </button>
+                        <mat-error *ngIf="userForm.get('password')?.hasError('required')">
+                            La contraseña es requerida
+                        </mat-error>
+                        <mat-error *ngIf="userForm.get('password')?.hasError('minlength')">
+                            La contraseña debe tener al menos 6 caracteres
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                    <!-- Rol -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Rol</mat-label>
+                        <mat-select formControlName="id_rol">
+                            <mat-option *ngFor="let rol of roles" [value]="rol.id_rol">
+                                {{ rol.nombre }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="userForm.get('id_rol')?.hasError('required')">
+                            El rol es requerido
+                        </mat-error>
+                    </mat-form-field>
+
+                    <!-- Sucursal -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Sucursal</mat-label>
+                        <mat-select formControlName="id_sucursal">
+                            <mat-option *ngFor="let sucursal of branches" [value]="sucursal.id_sucursal">
+                                {{ sucursal.nombre_sucursal }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="userForm.get('id_sucursal')?.hasError('required')">
+                            La sucursal es requerida
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Botones de acción -->
+                <div class="form-actions">
+                    <button type="button" mat-button (click)="onCancel()" [disabled]="isSubmitting">
+                        Cancelar
+                    </button>
+                    <button type="submit" mat-raised-button color="primary"
+                        [disabled]="userForm.invalid || isSubmitting">
+                        <mat-icon *ngIf="isSubmitting">
+                            <mat-spinner diameter="20"></mat-spinner>
+                        </mat-icon>
+                        <span *ngIf="!isSubmitting">{{ isNewUser ? 'Crear Usuario' : 'Actualizar Usuario' }}</span>
+                    </button>
+                </div>
+            </form>
+        </mat-card-content>
+    </mat-card>
+</div>

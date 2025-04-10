@@ -1,0 +1,157 @@
+<div class="transactions-container">
+    <div class="page-header">
+        <div class="header-title">
+            <h1>Transacciones de Inventario</h1>
+            <p>Historial de movimientos de productos</p>
+        </div>
+    </div>
+
+    <mat-card>
+        <mat-card-content>
+            <!-- Filtros -->
+            <form [formGroup]="filterForm" class="filters-container">
+                <!-- Selector de sucursal (solo para admin) -->
+                <mat-form-field appearance="outline" *ngIf="isAdmin">
+                    <mat-label>Sucursal</mat-label>
+                    <mat-select formControlName="sucursal">
+                        <mat-option [value]="null">Todas las sucursales</mat-option>
+                        <mat-option *ngFor="let branch of branches" [value]="branch.id_sucursal">
+                            {{ branch.nombre_sucursal }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+                <!-- Tipo de transacción -->
+                <mat-form-field appearance="outline">
+                    <mat-label>Tipo de Transacción</mat-label>
+                    <mat-select formControlName="tipo_transaccion">
+                        <mat-option [value]="null">Todos los tipos</mat-option>
+                        <mat-option value="compra">Compra</mat-option>
+                        <mat-option value="venta">Venta</mat-option>
+                        <mat-option value="ajuste">Ajuste</mat-option>
+                        <mat-option value="transferencia">Transferencia</mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+                <!-- Fecha inicio -->
+                <mat-form-field appearance="outline">
+                    <mat-label>Fecha Inicio</mat-label>
+                    <input matInput [matDatepicker]="pickerStart" formControlName="fecha_inicio">
+                    <mat-datepicker-toggle matSuffix [for]="pickerStart"></mat-datepicker-toggle>
+                    <mat-datepicker #pickerStart></mat-datepicker>
+                </mat-form-field>
+
+                <!-- Fecha fin -->
+                <mat-form-field appearance="outline">
+                    <mat-label>Fecha Fin</mat-label>
+                    <input matInput [matDatepicker]="pickerEnd" formControlName="fecha_fin">
+                    <mat-datepicker-toggle matSuffix [for]="pickerEnd"></mat-datepicker-toggle>
+                    <mat-datepicker #pickerEnd></mat-datepicker>
+                </mat-form-field>
+
+                <!-- Botones de acción -->
+                <div class="filter-actions">
+                    <button mat-raised-button color="primary" (click)="loadTransactions()">
+                        <mat-icon>search</mat-icon> Buscar
+                    </button>
+                    <button mat-button (click)="resetFilters()">
+                        <mat-icon>clear</mat-icon> Limpiar Filtros
+                    </button>
+                </div>
+            </form>
+
+            <!-- Filtro de búsqueda general -->
+            <div class="search-filter">
+                <mat-form-field appearance="outline">
+                    <mat-label>Buscar</mat-label>
+                    <input matInput (keyup)="applyFilter($event)" placeholder="Buscar en resultados" #input>
+                    <mat-icon matPrefix>search</mat-icon>
+                </mat-form-field>
+            </div>
+
+            <!-- Mensaje de error -->
+            <div *ngIf="error" class="error-message">
+                {{ error }}
+            </div>
+
+            <!-- Indicador de carga -->
+            <div *ngIf="isLoading" class="loading-container">
+                <mat-spinner diameter="40"></mat-spinner>
+                <p>Cargando transacciones...</p>
+            </div>
+
+            <!-- Tabla de transacciones -->
+            <div class="table-container" *ngIf="!isLoading">
+                <table mat-table [dataSource]="dataSource" matSort>
+
+                    <!-- ID Column -->
+                    <ng-container matColumnDef="id_transaccion">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> ID </th>
+                        <td mat-cell *matCellDef="let item"> {{ item.id_transaccion }} </td>
+                    </ng-container>
+
+                    <!-- Fecha Column -->
+                    <ng-container matColumnDef="transaccion_fecha_hora">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Fecha </th>
+                        <td mat-cell *matCellDef="let item"> {{ item.transaccion_fecha_hora | date:'short' }} </td>
+                    </ng-container>
+
+                    <!-- Producto Column -->
+                    <ng-container matColumnDef="producto">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Producto </th>
+                        <td mat-cell *matCellDef="let item"> {{ item.nombre_producto }} </td>
+                    </ng-container>
+
+                    <!-- Sucursal Column -->
+                    <ng-container matColumnDef="sucursal">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Sucursal </th>
+                        <td mat-cell *matCellDef="let item"> {{ item.nombre_sucursal }} </td>
+                    </ng-container>
+
+                    <!-- Tipo Column -->
+                    <ng-container matColumnDef="tipo_transaccion">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo </th>
+                        <td mat-cell *matCellDef="let item">
+                            <span class="transaction-type" [ngClass]="getTransactionTypeClass(item.tipo_transaccion)">
+                                {{ getTransactionTypeLabel(item.tipo_transaccion) }}
+                            </span>
+                        </td>
+                    </ng-container>
+
+                    <!-- Cantidad Column -->
+                    <ng-container matColumnDef="cantidad">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Cantidad </th>
+                        <td mat-cell *matCellDef="let item">
+                            <span class="quantity"
+                                [ngClass]="{'positive': item.cantidad > 0, 'negative': item.cantidad < 0}">
+                                {{ item.cantidad > 0 ? '+' : '' }}{{ item.cantidad }}
+                            </span>
+                        </td>
+                    </ng-container>
+
+                    <!-- Usuario Column -->
+                    <ng-container matColumnDef="usuario">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Usuario </th>
+                        <td mat-cell *matCellDef="let item"> {{ item.nombre_usuario || 'Sin asignar' }} </td>
+                    </ng-container>
+
+                    <!-- Comentario Column -->
+                    <ng-container matColumnDef="comentario">
+                        <th mat-header-cell *matHeaderCellDef> Comentario </th>
+                        <td mat-cell *matCellDef="let item"> {{ item.comentario || 'Sin comentario' }} </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+                    <!-- Row shown when there is no matching data. -->
+                    <tr class="mat-row" *matNoDataRow>
+                        <td class="mat-cell" colspan="8">No se encontraron transacciones</td>
+                    </tr>
+                </table>
+
+                <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" showFirstLastButtons></mat-paginator>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
