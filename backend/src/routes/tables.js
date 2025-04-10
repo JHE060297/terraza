@@ -7,7 +7,8 @@ const {
     updateTable,
     deleteTable,
     changeTableStatus,
-    freeTable
+    freeTable,
+    getTablesByBranch
 } = require('../controllers/tableController');
 const {
     isAuthenticated,
@@ -93,5 +94,12 @@ router.post('/mesas/:id/cambiar_estado', [
  * @access Private (Admin, Cajero)
  */
 router.post('/mesas/:id/liberar_mesa', isAuthenticated, isAdminOrCashier, freeTable);
+
+/**
+ * @route GET /api/sucursales/mesas/:idSucursal
+ * @desc Obtener todas las mesas de una sucursal
+ * @access Private (Admin, Cajero, Mesero)
+ */
+router.get('/mesas/sucursal/:idSucursal', isAuthenticated, isAdminOrCashierOrWaiter, getTablesByBranch);
 
 module.exports = router;

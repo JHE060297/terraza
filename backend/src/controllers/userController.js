@@ -330,9 +330,11 @@ const deleteUser = async (req, res) => {
         // Eliminar el usuario
         await prisma.usuario.delete({
             where: { id_usuario: parseInt(id) }
-        });
+        })
 
+        // Responder con un estado 204 No Content
         res.status(204).send();
+
     } catch (error) {
         console.error('Error en deleteUser:', error);
         res.status(500).json({ message: 'Error al eliminar usuario', error: error.message });

@@ -428,6 +428,42 @@ const freeTable = async (req, res) => {
     }
 };
 
+/**
+ * Obtener mesas por sucursal
+ */
+
+const getTablesByBranch = async (req, res) => {
+    try {
+        const { id_sucursal } = req.params;
+
+        // Verificar si la sucursal existe
+        const sucursal = await prisma.sucursal.findUnique({
+            where: { id_sucursal: parseInt(id_sucursal) }
+        });
+
+        if (!sucursal) {
+            return res.status(404).json({ message: 'Sucursal no encontrada' });
+        }
+
+        // Obtener mesas de la sucursal
+        const mesas = await prisma.mesa.findMany({
+            where: { id_sucursal: parseInt(id_sucursal) },
+            include: {
+                sucursal: {
+                    select: {
+                        nombre_sucursal: true
+                    }
+                }
+            }
+        });
+
+        res.json(mesas);
+    } catch (error) {
+        console.error('Error en getTablesByBranch:', error);
+        res.status(500).json({ message: 'Error al obtener mesas por sucursal', error: error.message });
+    }
+}
+
 module.exports = {
     getAllTables,
     getTableById,
@@ -435,5 +471,6 @@ module.exports = {
     updateTable,
     deleteTable,
     changeTableStatus,
-    freeTable
+    freeTable,
+    getTablesByBranch
 };
