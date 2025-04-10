@@ -15,22 +15,27 @@ export class SucursalService {
 
     // Sucursales
     getBranches(): Observable<Sucursal[]> {
+        // Modificado: mantener 'sucursales/' al final porque el backend lo espera así
         return this.http.get<Sucursal[]>(`${this.apiUrl}sucursales/`);
     }
 
     getBranchById(id: number): Observable<Sucursal> {
+        // Modificado: mantener 'sucursales/' al final porque el backend lo espera así
         return this.http.get<Sucursal>(`${this.apiUrl}sucursales/${id}/`);
     }
 
     createBranch(branch: Sucursal): Observable<Sucursal> {
+        // Modificado: mantener 'sucursales/' al final porque el backend lo espera así
         return this.http.post<Sucursal>(`${this.apiUrl}sucursales/`, branch);
     }
 
     updateBranch(id: number, branch: Partial<Sucursal>): Observable<Sucursal> {
-        return this.http.patch<Sucursal>(`${this.apiUrl}sucursales/${id}/`, branch);
+        // Modificado: mantener 'sucursales/' al final porque el backend lo espera así
+        return this.http.put<Sucursal>(`${this.apiUrl}sucursales/${id}/`, branch);
     }
 
     deleteBranch(id: number): Observable<any> {
+        // Modificado: mantener 'sucursales/' al final porque el backend lo espera así
         return this.http.delete(`${this.apiUrl}sucursales/${id}/`);
     }
 
@@ -56,7 +61,7 @@ export class SucursalService {
     }
 
     updateTable(id: number, table: Partial<Mesa>): Observable<Mesa> {
-        return this.http.patch<Mesa>(`${this.apiUrl}mesas/${id}/`, table);
+        return this.http.put<Mesa>(`${this.apiUrl}mesas/${id}/`, table);
     }
 
     deleteTable(id: number): Observable<any> {

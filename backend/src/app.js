@@ -42,7 +42,7 @@ app.use('/api/reports', reportsRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {
-  res.json({ message: 'API de gestión de restaurante funcionando correctamente' });
+  res.json({ message: 'API de gestión de bar funcionando correctamente' });
 });
 
 // Middleware de manejo de errores

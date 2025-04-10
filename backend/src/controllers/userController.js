@@ -54,9 +54,6 @@ const getAllUsers = async (req, res) => {
             if (fieldMapping[orderField]) {
                 orderBy[fieldMapping[orderField]] = orderDirection;
             }
-        } else {
-            // Ordenamiento por defecto
-            orderBy.date_joined = 'desc';
         }
 
         // Obtener usuarios con filtros y ordenamiento
@@ -104,11 +101,8 @@ const getUserById = async (req, res) => {
 
         const { id } = req.params;
 
-        const userId = parseInt(id, 10);
-        console.log('ID del usuario:', userId); // Agregar esta línea para depuración
-
         const user = await prisma.usuario.findUnique({
-            where: { id_usuario: userId },
+            where: { id_usuario: parseInt(id) },
             include: {
                 rol: {
                     select: {

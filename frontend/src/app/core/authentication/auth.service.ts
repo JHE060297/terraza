@@ -39,6 +39,7 @@ export class AuthService {
     }
 
     login(credentials: UserCredentials): Observable<boolean> {
+        // Modificado: usar la ruta correcta para autenticación según el backend Node.js
         return this.http.post<AuthResponse>(`${this.apiUrl}token/`, credentials)
             .pipe(
                 tap(response => {
@@ -49,6 +50,7 @@ export class AuthService {
                     // Obtener datos de usuario desde el token JWT (decodificación básica)
                     try {
                         const payload = JSON.parse(atob(response.access.split('.')[1]));
+
                         const user: Usuario = {
                             id_usuario: payload.user_id,
                             nombre: payload.nombre || '',
@@ -65,7 +67,8 @@ export class AuthService {
                         // Actualizar BehaviorSubject
                         this.currentUserSubject.next(user);
 
-                        this.router.navigate(['/dashboard'])
+                        // Navegar al dashboard después de login exitoso
+                        this.router.navigate(['/dashboard']);
                     } catch (error) {
                         console.error('Error al decodificar token', error);
                     }
@@ -79,10 +82,7 @@ export class AuthService {
     }
 
     logout(): void {
-
         this.inventoryService.clearSubscriptions();
-
-
 
         // Limpiar localStorage
         localStorage.removeItem(this.tokenKey);
@@ -107,6 +107,7 @@ export class AuthService {
             return of('');
         }
 
+        // Modificado: usar la ruta correcta para renovar token según el backend Node.js
         return this.http.post<{ access: string }>(`${this.apiUrl}token/refresh/`, { refresh: refreshToken })
             .pipe(
                 tap(response => {
@@ -131,7 +132,6 @@ export class AuthService {
 
     hasRole(roleName: string): boolean {
         const user = this.currentUserSubject.value;
-
         if (!user) return false;
         // Comprobar el rol específico
         return user.rol_nombre === roleName;

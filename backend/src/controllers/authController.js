@@ -71,7 +71,7 @@ const refreshToken = async (req, res) => {
             }
         });
 
-        if (!user || !user.is_active) {
+        if (!user) {
             return res.status(401).json({ message: 'Usuario no encontrado o inactivo' });
         }
 
