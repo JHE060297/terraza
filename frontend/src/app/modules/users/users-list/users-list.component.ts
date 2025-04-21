@@ -17,7 +17,7 @@ import { Router } from '@angular/router';
 })
 export class UsersListComponent implements OnInit {
     dataSource = new MatTableDataSource<Usuario>([]);
-    displayedColumns: string[] = ['id_usuario', 'nombre', 'apellido', 'usuario', 'rol_nombre', 'sucursal_nombre', 'actions'];
+    displayedColumns: string[] = ['nombre', 'apellido', 'usuario', 'rol_nombre', 'sucursal_nombre', 'actions'];
     isLoading = true;
     error = '';
 

@@ -84,12 +84,20 @@ router.delete('/inventario/:id', isAuthenticated, isAdmin, deleteInventory);
 router.post('/inventario/:id/adjust_stock', [
     isAuthenticated,
     isAdminOrCashier,
+    // Validación para el ID del parámetro
+    (req, res, next) => {
+        const { id } = req.params;
+        if (!id || isNaN(parseInt(id))) {
+            return res.status(400).json({ error: 'ID de inventario inválido' });
+        }
+        next();
+    },
     body('cantidad')
         .notEmpty().withMessage('La cantidad es requerida')
         .isInt().withMessage('La cantidad debe ser un número entero'),
     body('tipo_transaccion')
         .optional()
-        .isIn(['compra', 'venta', 'ajuste', 'transferencia']).withMessage('Tipo de transacción no válido')
+        .isIn(['compra', 'venta']).withMessage('Tipo de transacción no válido')
 ], adjustStock);
 
 module.exports = router;

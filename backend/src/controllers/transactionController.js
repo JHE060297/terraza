@@ -200,9 +200,9 @@ const createTransaction = async (req, res) => {
         }
 
         // Verificar el tipo de transacción
-        const tiposValidos = ['compra', 'venta', 'ajuste', 'transferencia'];
+        const tiposValidos = ['compra', 'venta'];
         if (!tiposValidos.includes(tipo_transaccion)) {
-            return res.status(400).json({ message: 'Tipo de transacción no válido' });
+            return res.status(400).json({ message: 'Tipo de transacción no válido. Solo se permite compra o venta.' });
         }
 
         // Buscar o crear el inventario para este producto en esta sucursal

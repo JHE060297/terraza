@@ -122,23 +122,46 @@ const createProduct = async (req, res) => {
             imagePath = path.join('products', req.file.filename).replace(/\\/g, '/');
         }
 
-        // Crear el producto
-        const newProduct = await prisma.producto.create({
-            data: {
-                nombre_producto,
-                descripcion,
-                precio_compra: parseFloat(precio_compra),
-                precio_venta: parseFloat(precio_venta),
-                image: imagePath,
-                is_active: is_active !== undefined ? is_active === 'true' : true
-            }
+        // Iniciar una transacción para crear el producto y sus registros de inventario
+        const result = await prisma.$transaction(async (prisma) => {
+            // 1. Crear el producto
+            const newProduct = await prisma.producto.create({
+                data: {
+                    nombre_producto,
+                    descripcion,
+                    precio_compra: parseFloat(precio_compra),
+                    precio_venta: parseFloat(precio_venta),
+                    image: imagePath,
+                    is_active: is_active !== undefined ? is_active === 'true' : true
+                }
+            });
+
+            // 2. Obtener todas las sucursales
+            const sucursales = await prisma.sucursal.findMany();
+
+            // 3. Crear registros de inventario con cantidad 0 para cada sucursal
+            const inventarioPromises = sucursales.map(sucursal =>
+                prisma.inventario.create({
+                    data: {
+                        id_producto: newProduct.id_producto,
+                        id_sucursal: sucursal.id_sucursal,
+                        cantidad: 0,
+                        alerta: 10 // Valor predeterminado para alerta de stock bajo
+                    }
+                })
+            );
+
+            // Ejecutar todas las promesas para crear los registros de inventario
+            await Promise.all(inventarioPromises);
+
+            return newProduct;
         });
 
         // Añadir URL completa de la imagen
         const host = req.protocol + '://' + req.get('host');
         const transformedProduct = {
-            ...newProduct,
-            image_url: newProduct.image ? `${host}/media/${newProduct.image}` : null
+            ...result,
+            image_url: result.image ? `${host}/media/${result.image}` : null
         };
 
         res.status(201).json(transformedProduct);
@@ -236,6 +259,7 @@ const updateProduct = async (req, res) => {
 const deleteProduct = async (req, res) => {
     try {
         const { id } = req.params;
+        console.log(`ID del producto a eliminar: ${id}`); // Para depuración
 
         // Verificar si el producto existe
         const existingProduct = await prisma.producto.findUnique({

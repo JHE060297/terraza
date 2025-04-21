@@ -241,7 +241,9 @@ const deleteBranch = async (req, res) => {
                     select: {
                         mesas: true,
                         usuarios: true,
-                        inventarios: true
+                        inventarios: true,
+                        transacciones: true,
+                        reportes: true
                     }
                 }
             }
@@ -251,14 +253,28 @@ const deleteBranch = async (req, res) => {
             return res.status(404).json({ message: 'Sucursal no encontrada' });
         }
 
-        // Verificar si la sucursal tiene mesas, usuarios o inventarios asociados
-        if (
-            existingSucursal._count.mesas > 0 ||
-            existingSucursal._count.usuarios > 0 ||
-            existingSucursal._count.inventarios > 0
-        ) {
+        // Crear un mensaje detallado de las dependencias
+        const dependencies = [];
+        
+        if (existingSucursal._count.mesas > 0) {
+            dependencies.push(`${existingSucursal._count.mesas} mesas`);
+        }
+        if (existingSucursal._count.usuarios > 0) {
+            dependencies.push(`${existingSucursal._count.usuarios} usuarios`);
+        }
+        if (existingSucursal._count.inventarios > 0) {
+            dependencies.push(`${existingSucursal._count.inventarios} registros de inventario`);
+        }
+        if (existingSucursal._count.transacciones > 0) {
+            dependencies.push(`${existingSucursal._count.transacciones} transacciones`);
+        }
+        if (existingSucursal._count.reportes > 0) {
+            dependencies.push(`${existingSucursal._count.reportes} reportes`);
+        }
+
+        if (dependencies.length > 0) {
             return res.status(400).json({
-                message: 'No se puede eliminar la sucursal porque tiene mesas, usuarios o inventarios asociados'
+                message: `No se puede eliminar la sucursal porque tiene: ${dependencies.join(', ')}`
             });
         }
 
@@ -270,6 +286,14 @@ const deleteBranch = async (req, res) => {
         res.status(204).send();
     } catch (error) {
         console.error('Error en deleteBranch:', error);
+        
+        // Verificar si es un error de referencia de Prisma
+        if (error.code === 'P2003') {
+            return res.status(400).json({ 
+                message: 'No se puede eliminar la sucursal porque tiene registros asociados en la base de datos. Por favor, elimine primero todos los registros relacionados.'
+            });
+        }
+        
         res.status(500).json({ message: 'Error al eliminar sucursal', error: error.message });
     }
 };

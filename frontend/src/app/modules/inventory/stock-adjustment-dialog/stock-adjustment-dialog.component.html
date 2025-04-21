@@ -10,9 +10,7 @@
                 <mat-label>Tipo de transacción</mat-label>
                 <mat-select formControlName="tipo_transaccion">
                     <mat-option value="compra">Compra</mat-option>
-                    <mat-option value="venta ">Venta</mat-option>
-                    <mat-option value="ajuste">Ajuste</mat-option>
-                    <mat-option value="transferencia">Transferencia</mat-option>
+                    <mat-option value="venta">Venta</mat-option>
                 </mat-select>
                 <mat-error *ngIf="adjustmentForm.get('tipo_transaccion')?.hasError('required')">
                     El tipo de transacción es requerido

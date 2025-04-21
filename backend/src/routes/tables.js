@@ -100,6 +100,6 @@ router.post('/mesas/:id/liberar_mesa', isAuthenticated, isAdminOrCashier, freeTa
  * @desc Obtener todas las mesas de una sucursal
  * @access Private (Admin, Cajero, Mesero)
  */
-router.get('/mesas/sucursal/:idSucursal', isAuthenticated, isAdminOrCashierOrWaiter, getTablesByBranch);
+router.get('/mesas/sucursal/:idSucursal', isAuthenticated, isAdminOrCashierOrWaiter, getTablesByBranch); //TODO: Cambiar a getTablesByBranch    
 
 module.exports = router;

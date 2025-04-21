@@ -1,3 +1,5 @@
+// frontend/src/app/modules/sucursales/sucursal-list/sucursal-list.component.ts
+
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
@@ -7,14 +9,13 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { SucursalService } from '../../../core/services/sucursales.service';
 import { Sucursal } from '../../../core/models/user.model';
 import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
-import { sharedImports } from '../../../shared/shared.imports';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { sharedImports } from '../../../shared/shared.imports';
 
 @Component({
     selector: 'app-sucursal-list',
     standalone: true,
-    imports: [CommonModule, ...sharedImports],
+    imports: [sharedImports],
     templateUrl: './sucursal-list.component.html',
     styleUrls: ['./sucursal-list.component.scss']
 })
@@ -83,7 +84,10 @@ export class SucursalListComponent implements OnInit {
         const confirmDialog = this.dialog.open(ConfirmDialogComponent, {
             data: {
                 title: 'Confirmar eliminación',
-                message: `¿Está seguro de eliminar la sucursal ${branch.nombre_sucursal}?`
+                message: `¿Está seguro de eliminar la sucursal ${branch.nombre_sucursal}?`,
+                confirmText: 'Eliminar',
+                cancelText: 'Cancelar',
+                color: 'warn'
             }
         });
 
@@ -97,8 +101,17 @@ export class SucursalListComponent implements OnInit {
                         });
                     },
                     error: (error) => {
-                        this.snackBar.open('Error al eliminar sucursal', 'Cerrar', {
-                            duration: 3000
+                        // Mejorar el manejo de errores mostrando el mensaje específico del backend
+                        let errorMessage = 'Error al eliminar sucursal';
+                        
+                        if (error.error && error.error.message) {
+                            errorMessage = error.error.message;
+                        } else if (error.error && typeof error.error === 'string') {
+                            errorMessage = error.error;
+                        }
+                        
+                        this.snackBar.open(errorMessage, 'Cerrar', {
+                            duration: 5000
                         });
                         console.error('Error deleting branch', error);
                     }

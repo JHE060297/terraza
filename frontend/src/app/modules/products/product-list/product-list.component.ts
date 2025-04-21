@@ -20,7 +20,7 @@ import { environment } from '../../../../environments/environment';
 })
 export class ProductListComponent implements OnInit {
     dataSource = new MatTableDataSource<Producto>([]);
-    displayedColumns: string[] = ['id_producto', 'image', 'nombre_producto', 'precio_compra', 'precio_venta', 'is_active', 'actions'];
+    displayedColumns: string[] = ['image', 'nombre_producto', 'precio_compra', 'precio_venta', 'is_active', 'actions'];
     isLoading = true;
     error = '';
     showInactiveProducts = false;

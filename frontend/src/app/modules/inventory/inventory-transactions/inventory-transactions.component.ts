@@ -149,23 +149,19 @@ export class InventoryTransactionsComponent implements OnInit {
         }
     }
 
-    getTransactionTypeClass(type: string): string {
-        switch (type) {
-            case 'compra': return 'transaction-purchase';
-            case 'venta': return 'transaction-sale';
-            case 'ajuste': return 'transaction-adjustment';
-            case 'transferencia': return 'transaction-transfer';
-            default: return '';
-        }
-    }
-
     getTransactionTypeLabel(type: string): string {
         switch (type) {
             case 'compra': return 'Compra';
             case 'venta': return 'Venta';
-            case 'ajuste': return 'Ajuste';
-            case 'transferencia': return 'Transferencia';
             default: return type;
+        }
+    }
+    
+    getTransactionTypeClass(type: string): string {
+        switch (type) {
+            case 'compra': return 'transaction-purchase';
+            case 'venta': return 'transaction-sale';
+            default: return '';
         }
     }
 }

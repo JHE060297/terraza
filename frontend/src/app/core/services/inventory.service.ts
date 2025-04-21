@@ -95,8 +95,21 @@ export class InventoryService {
     }
 
     adjustInventory(id: number, adjustment: AjusteInventario): Observable<any> {
+        // Asegurarse de que el ID es un número válido
+        if (!id || isNaN(id)) {
+            throw new Error('ID de inventario inválido');
+        }
+        
         // Asegurarse de que la URL y el formato de los datos sean correctos
-        return this.http.post<any>(`${this.apiUrl}inventario/${id}/adjust_stock/`, adjustment);
+        const url = `${this.apiUrl}inventario/${id}/adjust_stock/`;
+        
+        console.log('Enviando ajuste de inventario:', {
+            url,
+            id,
+            adjustment
+        });
+        
+        return this.http.post<any>(url, adjustment);
     }
 
     // Transacciones

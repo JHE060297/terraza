@@ -46,7 +46,7 @@ router.post('/transacciones', [
         .isInt().withMessage('La cantidad debe ser un número entero'),
     body('tipo_transaccion')
         .notEmpty().withMessage('El tipo de transacción es requerido')
-        .isIn(['compra', 'venta', 'ajuste', 'transferencia']).withMessage('Tipo de transacción no válido')
+        .isIn(['compra', 'venta']).withMessage('Tipo de transacción no válido, debe ser compra o venta')
 ], createTransaction);
 
 module.exports = router;

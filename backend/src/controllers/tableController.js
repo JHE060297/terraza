@@ -432,7 +432,7 @@ const freeTable = async (req, res) => {
  * Obtener mesas por sucursal
  */
 
-const getTablesByBranch = async (req, res) => {
+const getTablesByBranch = async (req, res) => { //TODO: Verificar la logica por que no esta sirviendo
     try {
         const { id_sucursal } = req.params;
 

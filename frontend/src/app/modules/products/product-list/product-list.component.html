@@ -41,12 +41,6 @@
             <div class="table-container" *ngIf="!isLoading">
                 <table mat-table [dataSource]="dataSource" matSort>
 
-                    <!-- ID Column -->
-                    <ng-container matColumnDef="id_producto">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header> ID </th>
-                        <td mat-cell *matCellDef="let product"> {{ product.id_producto }} </td>
-                    </ng-container>
-
                     <!-- Image Column -->
                     <ng-container matColumnDef="image">
                         <th mat-header-cell *matHeaderCellDef> Imagen </th>
