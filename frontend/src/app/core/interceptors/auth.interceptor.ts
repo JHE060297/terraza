@@ -5,6 +5,14 @@ import { AuthService } from '../authentication/auth.service';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { environment } from '../../../environments/environment';
+import { Injectable } from '@angular/core';
+import {
+    HttpRequest,
+    HttpHandler,
+    HttpEvent,
+    HttpInterceptor
+} from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 // Auth interceptor como función
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
@@ -75,4 +83,23 @@ function getServerErrorMessage(error: any): string | null {
     }
 
     return null;
+}
+
+@Injectable()
+export class AuthInterceptor implements HttpInterceptor {
+    intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+        // Obtener el token del localStorage
+        const token = localStorage.getItem('token');
+
+        // Si hay un token, agregarlo al header de la solicitud
+        if (token) {
+            request = request.clone({
+                setHeaders: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+        }
+
+        return next.handle(request);
+    }
 }

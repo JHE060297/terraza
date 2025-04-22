@@ -25,10 +25,6 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 
-// Components
-import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
-import { PlaceholderComponent } from './components/placeholder/placeholder.component';
-
 const materialModules = [
   MatButtonModule,
   MatCardModule,
@@ -52,28 +48,20 @@ const materialModules = [
   MatDatepickerModule
 ];
 
-const components = [
-  ConfirmDialogComponent,
-  PlaceholderComponent
-];
-
 @NgModule({
-  declarations: [
-  ],
+  declarations: [],
   imports: [
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
     RouterModule,
-    ...components,
     ...materialModules
   ],
   exports: [
     FormsModule,
     ReactiveFormsModule,
     RouterModule,
-    ...materialModules,
-    ...components
+    ...materialModules
   ]
 })
 export class SharedModule { }

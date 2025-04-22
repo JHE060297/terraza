@@ -10,12 +10,29 @@ import { SucursalService } from '../../../core/services/sucursales.service';
 import { Sucursal } from '../../../core/models/user.model';
 import { Router } from '@angular/router';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
-import { sharedImports } from '../../../shared/shared.imports';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatSortModule } from '@angular/material/sort';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { CommonModule } from '@angular/common';
 
 @Component({
     selector: 'app-sucursal-list',
     standalone: true,
-    imports: [sharedImports],
+    imports: [
+        CommonModule,
+        MatButtonModule,
+        MatIconModule,
+        MatTableModule,
+        MatPaginatorModule,
+        MatSortModule,
+        MatDialogModule,
+        MatSnackBarModule,
+        ConfirmDialogComponent
+    ],
     templateUrl: './sucursal-list.component.html',
     styleUrls: ['./sucursal-list.component.scss']
 })

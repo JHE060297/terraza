@@ -253,34 +253,41 @@ const deleteBranch = async (req, res) => {
             return res.status(404).json({ message: 'Sucursal no encontrada' });
         }
 
-        // Crear un mensaje detallado de las dependencias
-        const dependencies = [];
-        
-        if (existingSucursal._count.mesas > 0) {
-            dependencies.push(`${existingSucursal._count.mesas} mesas`);
-        }
-        if (existingSucursal._count.usuarios > 0) {
-            dependencies.push(`${existingSucursal._count.usuarios} usuarios`);
-        }
-        if (existingSucursal._count.inventarios > 0) {
-            dependencies.push(`${existingSucursal._count.inventarios} registros de inventario`);
-        }
-        if (existingSucursal._count.transacciones > 0) {
-            dependencies.push(`${existingSucursal._count.transacciones} transacciones`);
-        }
-        if (existingSucursal._count.reportes > 0) {
-            dependencies.push(`${existingSucursal._count.reportes} reportes`);
-        }
+        // Verificar si hay usuarios o mesas asociadas
+        if (existingSucursal._count.mesas > 0 || existingSucursal._count.usuarios > 0 || existingSucursal._count.reportes > 0) {
+            const dependencies = [];
+            
+            if (existingSucursal._count.mesas > 0) {
+                dependencies.push(`${existingSucursal._count.mesas} mesas`);
+            }
+            if (existingSucursal._count.usuarios > 0) {
+                dependencies.push(`${existingSucursal._count.usuarios} usuarios`);
+            }
+            if (existingSucursal._count.reportes > 0) {
+                dependencies.push(`${existingSucursal._count.reportes} reportes`);
+            }
 
-        if (dependencies.length > 0) {
             return res.status(400).json({
                 message: `No se puede eliminar la sucursal porque tiene: ${dependencies.join(', ')}`
             });
         }
 
-        // Eliminar la sucursal
-        await prisma.sucursal.delete({
-            where: { id_sucursal: parseInt(id) }
+        // Si solo hay registros de inventario o transacciones, permitir eliminar todo en una transacción
+        await prisma.$transaction(async (prisma) => {
+            // Eliminar transacciones de inventario asociadas
+            await prisma.transaccionInventario.deleteMany({
+                where: { id_sucursal: parseInt(id) }
+            });
+
+            // Eliminar registros de inventario asociados
+            await prisma.inventario.deleteMany({
+                where: { id_sucursal: parseInt(id) }
+            });
+
+            // Eliminar la sucursal
+            await prisma.sucursal.delete({
+                where: { id_sucursal: parseInt(id) }
+            });
         });
 
         res.status(204).send();
