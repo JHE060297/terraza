@@ -105,7 +105,7 @@ async function main() {
     console.log('Usuario mesero creado correctamente');
 
     // Crear mesas para la sucursal principal
-    for (let i = 1; i <= 10; i++) {
+    for (let i = 1; i <= 5; i++) {
         await prisma.mesa.upsert({
             where: {
                 numero_id_sucursal: {
@@ -244,8 +244,8 @@ async function main() {
             data: {
                 id_producto: createdProducto.id_producto,
                 id_sucursal: sucursalPrincipal.id_sucursal,
-                cantidad: 50,
-                alerta: 10
+                cantidad: 10,
+                alerta: 2
             }
         });
     }

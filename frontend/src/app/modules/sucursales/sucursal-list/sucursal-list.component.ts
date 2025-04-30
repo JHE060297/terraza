@@ -18,6 +18,7 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
+import { sharedImports } from '../../../shared/shared.imports';
 
 @Component({
     selector: 'app-sucursal-list',
@@ -31,7 +32,8 @@ import { CommonModule } from '@angular/common';
         MatSortModule,
         MatDialogModule,
         MatSnackBarModule,
-        ConfirmDialogComponent
+        ConfirmDialogComponent,
+        ...sharedImports
     ],
     templateUrl: './sucursal-list.component.html',
     styleUrls: ['./sucursal-list.component.scss']
