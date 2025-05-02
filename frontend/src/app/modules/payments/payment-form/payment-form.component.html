@@ -1,0 +1,113 @@
+<div class="payment-form-container">
+    <div class="page-header">
+        <h1>Procesar Pago</h1>
+        <p>Complete los detalles del pago para finalizar el pedido</p>
+    </div>
+
+    <mat-card>
+        <mat-card-content>
+            <!-- Mensaje de error -->
+            <div *ngIf="error" class="error-message">
+                {{ error }}
+            </div>
+
+            <!-- Indicador de carga -->
+            <div *ngIf="isLoading" class="loading-container">
+                <mat-spinner diameter="40"></mat-spinner>
+                <p>Cargando detalles del pedido...</p>
+            </div>
+
+            <!-- Detalles del pedido -->
+            <div *ngIf="!isLoading && order" class="order-summary">
+                <mat-card>
+                    <mat-card-header>
+                        <mat-card-title>Resumen del Pedido</mat-card-title>
+                        <mat-card-subtitle>Pedido #{{ order.id_pedido }}</mat-card-subtitle>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <div class="order-info">
+                            <p><strong>Mesa:</strong> {{ order.mesa_numero }}</p>
+                            <p><strong>Sucursal:</strong> {{ order.sucursal_nombre }}</p>
+                            <p><strong>Fecha:</strong> {{ order.created_at | date:'medium' }}</p>
+                        </div>
+
+                        <!-- Detalles de los productos -->
+                        <table mat-table [dataSource]="order.detalles" class="order-details-table"
+                            *ngIf="order.detalles">
+                            <ng-container matColumnDef="producto">
+                                <th mat-header-cell *matHeaderCellDef> Producto </th>
+                                <td mat-cell *matCellDef="let detail"> {{ detail.producto_nombre }} </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="cantidad">
+                                <th mat-header-cell *matHeaderCellDef> Cantidad </th>
+                                <td mat-cell *matCellDef="let detail"> {{ detail.cantidad }} </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="subtotal">
+                                <th mat-header-cell *matHeaderCellDef> Subtotal </th>
+                                <td mat-cell *matCellDef="let detail"> {{ detail.subtotal | currency }} </td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="['producto', 'cantidad', 'subtotal']"></tr>
+                            <tr mat-row *matRowDef="let row; columns: ['producto', 'cantidad', 'subtotal'];"></tr>
+                        </table>
+
+                        <div class="total-summary">
+                            <h3>Total a Pagar: {{ order.total | currency }}</h3>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+
+            <!-- Formulario de pago -->
+            <form *ngIf="!isLoading && order" [formGroup]="paymentForm" (ngSubmit)="onSubmit()" class="payment-form">
+                <input type="hidden" formControlName="id_pedido">
+
+                <!-- Monto a pagar (solo lectura) -->
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Monto</mat-label>
+                    <input matInput formControlName="monto" readonly>
+                    <span matPrefix>$&nbsp;</span>
+                </mat-form-field>
+
+                <!-- Método de pago -->
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Método de Pago</mat-label>
+                    <mat-select formControlName="metodo_pago" (selectionChange)="onPaymentMethodChange()">
+                        <mat-option *ngFor="let method of paymentMethods" [value]="method.value">
+                            {{ method.label }}
+                        </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="paymentForm.get('metodo_pago')?.hasError('required')">
+                        El método de pago es requerido
+                    </mat-error>
+                </mat-form-field>
+
+                <!-- Referencia de pago -->
+                <mat-form-field appearance="outline" class="full-width"
+                    *ngIf="paymentForm.get('metodo_pago')?.value && paymentForm.get('metodo_pago')?.value !== 'efectivo'">
+                    <mat-label>Referencia de Pago</mat-label>
+                    <input matInput formControlName="referencia_pago" placeholder="Ej: Número de transacción">
+                    <mat-error *ngIf="paymentForm.get('referencia_pago')?.hasError('required')">
+                        La referencia de pago es requerida para este método
+                    </mat-error>
+                </mat-form-field>
+
+                <!-- Botones de acción -->
+                <div class="form-actions">
+                    <button mat-button type="button" (click)="cancel()" [disabled]="isSubmitting">
+                        Cancelar
+                    </button>
+                    <button mat-raised-button color="primary" type="submit"
+                        [disabled]="paymentForm.invalid || isSubmitting">
+                        <mat-icon *ngIf="isSubmitting">
+                            <mat-spinner diameter="20"></mat-spinner>
+                        </mat-icon>
+                        <span *ngIf="!isSubmitting">Procesar Pago</span>
+                    </button>
+                </div>
+            </form>
+        </mat-card-content>
+    </mat-card>
+</div>

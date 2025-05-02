@@ -5,18 +5,16 @@ import { SharedModule } from '../../shared/shared.module';
 import { authGuard } from '../../core/guards/auth.guard';
 import { roleGuard } from '../../core/guards/role.guard';
 import { PlaceholderComponent } from '../../shared/components/placeholder/placeholder.component';
+import { OrdersViewComponent } from './order-view/orders-view.component';
+import { OrderFormComponent } from './order-form/order-form.component';
 
 const routes: Routes = [
   {
     path: '',
-    component: PlaceholderComponent,
+    component: OrdersViewComponent,
     canActivate: [authGuard],
-    data: {
-      roles: ['administrador', 'cajero', 'mesero'],
-      title: 'Gestión de Pedidos',
-      message: 'El módulo de pedidos estará disponible próximamente. Aquí podrás crear y gestionar pedidos.'
-    }
-  }
+    data: { roles: ['administrador', 'cajero', 'mesero'] }
+  },
 ];
 
 @NgModule({

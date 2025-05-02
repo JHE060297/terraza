@@ -1,0 +1,109 @@
+<div class="orders-container">
+    <div class="page-header">
+        <div class="header-title">
+            <h1>Pedidos</h1>
+            <p>Gestión de pedidos del sistema</p>
+        </div>
+        <div class="header-actions">
+            <button mat-raised-button color="primary" (click)="createOrder()"
+                *ngIf="authService.isMesero() || authService.isAdmin()">
+                <mat-icon>add</mat-icon> Nuevo Pedido
+            </button>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <mat-card class="filters-card">
+        <mat-card-content>
+            <div class="filters-container">
+                <mat-form-field appearance="outline">
+                    <mat-label>Estado</mat-label>
+                    <mat-select [(ngModel)]="statusFilter" (selectionChange)="filterOrders()">
+                        <mat-option [value]="''">Todos</mat-option>
+                        <mat-option value="pendiente">Pendiente</mat-option>
+                        <mat-option value="entregado">Entregado</mat-option>
+                        <mat-option value="pagado">Pagado</mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+                <button mat-button color="primary" (click)="loadOrders()">
+                    <mat-icon>refresh</mat-icon> Actualizar
+                </button>
+            </div>
+        </mat-card-content>
+    </mat-card>
+
+    <!-- Indicador de carga -->
+    <div *ngIf="isLoading" class="loading-container">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Cargando pedidos...</p>
+    </div>
+
+    <!-- Error -->
+    <div *ngIf="error" class="error-message">
+        {{ error }}
+    </div>
+
+    <!-- Lista de pedidos -->
+    <div *ngIf="!isLoading && filteredOrders.length > 0" class="orders-grid">
+        <mat-card *ngFor="let order of filteredOrders" class="order-card">
+            <mat-card-header>
+                <div mat-card-avatar class="order-icon">
+                    <mat-icon>receipt</mat-icon>
+                </div>
+                <mat-card-title>Pedido #{{ order.id_pedido }}</mat-card-title>
+                <mat-card-subtitle>
+                    Mesa {{ order.mesa_numero }} - {{ order.sucursal_nombre }}
+                </mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content>
+                <div class="order-info">
+                    <p><strong>Estado:</strong>
+                        <span [ngClass]="getStatusClass(order.estado)">
+                            {{ getStatusLabel(order.estado) }}
+                        </span>
+                    </p>
+                    <p><strong>Total:</strong> {{ order.total | currency }}</p>
+                    <p><strong>Fecha:</strong> {{ order.created_at | date:'short' }}</p>
+                </div>
+            </mat-card-content>
+
+            <mat-card-actions>
+                <button mat-button color="primary" (click)="viewOrderDetails(order)">
+                    <mat-icon>visibility</mat-icon> Ver Detalles
+                </button>
+
+                <button mat-button color="accent"
+                    *ngIf="(authService.isAdmin() || authService.isCajero()) && order.estado !== 'pagado'"
+                    (click)="processPayment(order)">
+                    <mat-icon>payment</mat-icon> Procesar Pago
+                </button>
+
+                <button mat-button [matMenuTriggerFor]="statusMenu" *ngIf="authService.isAdmin()">
+                    <mat-icon>edit</mat-icon> Cambiar Estado
+                </button>
+                <mat-menu #statusMenu="matMenu">
+                    <button mat-menu-item (click)="changeOrderStatus(order, 'pendiente')"
+                        [disabled]="order.estado === 'pendiente'">
+                        Pendiente
+                    </button>
+                    <button mat-menu-item (click)="changeOrderStatus(order, 'entregado')"
+                        [disabled]="order.estado === 'entregado'">
+                        Entregado
+                    </button>
+                    <button mat-menu-item (click)="changeOrderStatus(order, 'pagado')"
+                        [disabled]="order.estado === 'pagado'">
+                        Pagado
+                    </button>
+                </mat-menu>
+            </mat-card-actions>
+        </mat-card>
+    </div>
+
+    <!-- Sin pedidos -->
+    <div *ngIf="!isLoading && filteredOrders.length === 0" class="no-orders-message">
+        <mat-icon>receipt_long</mat-icon>
+        <p>No hay pedidos disponibles</p>
+    </div>
+</div>
