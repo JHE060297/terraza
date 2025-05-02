@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Reporte } from '../models/reports.model';
 
 @Injectable({
     providedIn: 'root'
@@ -12,63 +11,27 @@ export class ReportsService {
 
     constructor(private http: HttpClient) { }
 
-    // Reportes
-    getReports(filters?: any): Observable<Reporte[]> {
-        let url = `${this.apiUrl}`;
-        if (filters) {
-            const params = new URLSearchParams();
-            Object.keys(filters).forEach(key => {
-                if (filters[key] !== null && filters[key] !== undefined) {
-                    params.set(key, filters[key]);
-                }
-            });
-            if (params.toString()) {
-                url += `?${params.toString()}`;
-            }
+    generateReport(reportData: any): Observable<Blob | any> {
+        // Si el formato es JSON, devolvemos un objeto JSON
+        if (reportData.formato === 'json') {
+            return this.http.post<any>(`${this.apiUrl}generate`, reportData);
         }
-        return this.http.get<Reporte[]>(url);
-    }
 
-    getReportById(id: number): Observable<Reporte> {
-        return this.http.get<Reporte>(`${this.apiUrl}${id}/`);
-    }
-
-    createReport(report: Reporte): Observable<Reporte> {
-        return this.http.post<Reporte>(this.apiUrl, report);
-    }
-
-    updateReport(id: number, report: Partial<Reporte>): Observable<Reporte> {
-        return this.http.patch<Reporte>(`${this.apiUrl}${id}/`, report);
-    }
-
-    deleteReport(id: number): Observable<any> {
-        return this.http.delete(`${this.apiUrl}${id}/`);
-    }
-
-    // Descargar reporte
-    downloadReport(id: number): Observable<Blob> {
-        return this.http.get(`${this.apiUrl}${id}/descargar/`, {
+        // Si es xlsx o csv, devolvemos un Blob
+        return this.http.post(`${this.apiUrl}generate`, reportData, {
             responseType: 'blob'
         });
     }
 
-    // Métodos de conveniencia
-    getReportsByBranch(branchId: number): Observable<Reporte[]> {
-        return this.getReports({ sucursal: branchId });
-    }
-
-    getReportsByUser(userId: number): Observable<Reporte[]> {
-        return this.getReports({ usuario: userId });
-    }
-
-    getReportsByFormat(format: string): Observable<Reporte[]> {
-        return this.getReports({ formato: format });
-    }
-
-    getReportsByDateRange(startDate: string, endDate: string): Observable<Reporte[]> {
-        return this.getReports({
-            fecha_inicio__gte: startDate,
-            fecha_fin__lte: endDate
-        });
+    // Método para descargar el reporte generado
+    downloadGeneratedReport(blob: Blob, filename: string): void {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
     }
 }

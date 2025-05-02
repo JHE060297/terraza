@@ -11,6 +11,7 @@ import { OrdersService } from '../../../core/services/orders.service';
 import { Router } from '@angular/router';
 import { forkJoin, Observable, of, interval, Subscription } from 'rxjs';
 import { catchError, finalize, startWith, switchMap, map } from 'rxjs/operators';
+import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { sharedImports } from '../../../shared/shared.imports';
 
 @Component({
@@ -68,6 +69,35 @@ export class TablesViewComponent implements OnInit, OnDestroy {
         }
     }
 
+    loadInitialDate(): void {
+
+        // Cargar datos iniciales
+        this.isLoading = true;
+
+        // Observable para sucursales (solo para admin)
+        const branches$ = this.isAdmin
+            ? this.sucursalesServices.getBranches().pipe(
+                catchError(() => {
+                    this.error = 'Error al cargar sucursales';
+                    return of([]);
+                })
+            )
+            : of([]);
+
+        // Cargar datos en paralelo
+        forkJoin({
+            branches: branches$,
+        }).pipe(
+            finalize(() => {
+                this.startAutoRefresh();
+            })
+        ).subscribe(result => {
+            if (this.isAdmin) {
+                this.branches = result.branches;
+            }
+        })
+    }
+
     startAutoRefresh(): void {
         // Cancelar cualquier suscripción existente
         if (this.refreshSubscription) {
@@ -97,25 +127,20 @@ export class TablesViewComponent implements OnInit, OnDestroy {
     }
 
     loadDataObservable(): Observable<any> {
-        // Observable para sucursales (solo para admin)
-        const branches$ = this.isAdmin
-            ? this.sucursalesServices.getBranches().pipe(
-                catchError(() => {
-                    this.error = 'Error al cargar sucursales';
-                    return of([]);
-                })
-            )
-            : of([]);
-
         // Observable para mesas según la sucursal seleccionada
-        const filters: any = {
-            id_sucursal: this.selectedBranchId
-        };
+        const filters: any = {};
 
+        // Aplicar filtro de sucursal
+        if (this.selectedBranchId) {
+            filters.id_sucursal = this.selectedBranchId;
+        }
+
+        // Aplicar filtro de estado
         if (this.statusFilter) {
             filters.estado = this.statusFilter;
         }
 
+        // Aplicar filtro de mesas activas/inactivas
         if (!this.showInactiveTables) {
             filters.is_active = true;
         }
@@ -127,19 +152,12 @@ export class TablesViewComponent implements OnInit, OnDestroy {
             })
         );
 
-        // Cargar datos en paralelo
-        return forkJoin({
-            branches: branches$,
-            tables: tables$
-        }).pipe(
-            map(result => {
-                if (this.isAdmin) {
-                    this.branches = result.branches;
-                }
-                return { tables: result.tables };
-            })
+        // Retornar las tablas
+        return tables$.pipe(
+            map(tables => ({ tables }))
         );
     }
+
 
     loadData(): void {
         this.startAutoRefresh();
@@ -160,20 +178,34 @@ export class TablesViewComponent implements OnInit, OnDestroy {
                         );
                         this.tableOrders[table.id_mesa] = activeOrders;
                     });
+            } else {
+                delete this.tableOrders[table.id_mesa];
             }
         }
     }
 
     onBranchChange(): void {
+        // Detener y reiniciar el intervalo de actualización
+        if (this.refreshSubscription) {
+            this.refreshSubscription.unsubscribe();
+        }
         this.loadData();
     }
 
     onStatusFilterChange(): void {
+        // Detener y reiniciar el intervalo de actualización
+        if (this.refreshSubscription) {
+            this.refreshSubscription.unsubscribe();
+        }
         this.loadData();
     }
 
     toggleInactiveTables(): void {
         this.showInactiveTables = !this.showInactiveTables;
+        // Detener y reiniciar el intervalo de actualización
+        if (this.refreshSubscription) {
+            this.refreshSubscription.unsubscribe();
+        }
         this.loadData();
     }
 
