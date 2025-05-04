@@ -1,0 +1,89 @@
+.order-detail-container {
+    padding: 16px;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+
+    .header-title {
+        h1 {
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        p {
+            color: #666;
+            margin: 0;
+        }
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 8px;
+    }
+}
+
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px;
+
+    p {
+        margin-top: 16px;
+        color: #666;
+    }
+}
+
+.error-message {
+    color: #f44336;
+    padding: 16px;
+    background-color: #ffebee;
+    border-radius: 4px;
+    margin-bottom: 16px;
+}
+
+.order-content {
+    .order-info {
+        margin-bottom: 24px;
+    }
+
+    table {
+        width: 100%;
+    }
+}
+
+.status-pending {
+    color: #ff9800;
+    font-weight: 500;
+}
+
+.status-delivered {
+    color: #2196f3;
+    font-weight: 500;
+}
+
+.status-paid {
+    color: #4caf50;
+    font-weight: 500;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+
+        .header-actions {
+            margin-top: 16px;
+            width: 100%;
+
+            button {
+                flex: 1;
+            }
+        }
+    }
+}

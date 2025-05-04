@@ -4,9 +4,9 @@ import { RouterModule, Routes } from '@angular/router';
 import { SharedModule } from '../../shared/shared.module';
 import { authGuard } from '../../core/guards/auth.guard';
 import { roleGuard } from '../../core/guards/role.guard';
-import { PlaceholderComponent } from '../../shared/components/placeholder/placeholder.component';
 import { OrdersViewComponent } from './order-view/orders-view.component';
 import { OrderFormComponent } from './order-form/order-form.component';
+import { OrderDetailComponent } from './order-detail/order-detail.component';
 
 const routes: Routes = [
   {
@@ -15,6 +15,18 @@ const routes: Routes = [
     canActivate: [authGuard],
     data: { roles: ['administrador', 'cajero', 'mesero'] }
   },
+  {
+    path: 'new',
+    component: OrderFormComponent,
+    canActivate: [authGuard],
+    data: { roles: ['administrador', 'mesero'] }
+  },
+  {
+    path: ':id',
+    component: OrderDetailComponent, // Necesita ser creado
+    canActivate: [authGuard],
+    data: { roles: ['administrador', 'cajero', 'mesero'] }
+  }
 ];
 
 @NgModule({
@@ -22,6 +34,9 @@ const routes: Routes = [
   imports: [
     CommonModule,
     SharedModule,
+    OrdersViewComponent,
+    OrderFormComponent,
+    OrderDetailComponent,
     RouterModule.forChild(routes)
   ],
   exports: [RouterModule]

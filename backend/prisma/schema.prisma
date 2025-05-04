@@ -24,7 +24,6 @@ model Sucursal {
     usuarios        Usuario[]
     inventarios     Inventario[]
     transacciones   TransaccionInventario[]
-    reportes        Reporte[]
 
     @@map("sucursal")
 }
@@ -42,7 +41,6 @@ model Usuario {
     pedidos_mesero PedidoMesero[]
     pagos          Pago[]
     transacciones  TransaccionInventario[]
-    reportes       Reporte[]
 
     @@map("usuario")
 }
@@ -152,18 +150,4 @@ model Pago {
     usuario     Usuario  @relation(fields: [id_usuario], references: [id_usuario])
 
     @@map("pago")
-}
-
-model Reporte {
-    id_reporte       Int      @id @default(autoincrement())
-    fecha_generacion DateTime @default(now())
-    fecha_inicio     DateTime
-    fecha_fin        DateTime
-    formato          String // "xlsx", "csv", "pdf"
-    id_usuario       Int
-    id_sucursal      Int
-    usuario          Usuario  @relation(fields: [id_usuario], references: [id_usuario])
-    sucursal         Sucursal @relation(fields: [id_sucursal], references: [id_sucursal])
-
-    @@map("reporte")
 }

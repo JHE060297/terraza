@@ -243,7 +243,6 @@ const deleteBranch = async (req, res) => {
                         usuarios: true,
                         inventarios: true,
                         transacciones: true,
-                        reportes: true
                     }
                 }
             }
@@ -254,17 +253,14 @@ const deleteBranch = async (req, res) => {
         }
 
         // Verificar si hay usuarios o mesas asociadas
-        if (existingSucursal._count.mesas > 0 || existingSucursal._count.usuarios > 0 || existingSucursal._count.reportes > 0) {
+        if (existingSucursal._count.mesas > 0 || existingSucursal._count.usuarios > 0) {
             const dependencies = [];
-            
+
             if (existingSucursal._count.mesas > 0) {
                 dependencies.push(`${existingSucursal._count.mesas} mesas`);
             }
             if (existingSucursal._count.usuarios > 0) {
                 dependencies.push(`${existingSucursal._count.usuarios} usuarios`);
-            }
-            if (existingSucursal._count.reportes > 0) {
-                dependencies.push(`${existingSucursal._count.reportes} reportes`);
             }
 
             return res.status(400).json({
@@ -293,14 +289,14 @@ const deleteBranch = async (req, res) => {
         res.status(204).send();
     } catch (error) {
         console.error('Error en deleteBranch:', error);
-        
+
         // Verificar si es un error de referencia de Prisma
         if (error.code === 'P2003') {
-            return res.status(400).json({ 
+            return res.status(400).json({
                 message: 'No se puede eliminar la sucursal porque tiene registros asociados en la base de datos. Por favor, elimine primero todos los registros relacionados.'
             });
         }
-        
+
         res.status(500).json({ message: 'Error al eliminar sucursal', error: error.message });
     }
 };

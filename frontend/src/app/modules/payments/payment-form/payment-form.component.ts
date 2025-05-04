@@ -6,6 +6,7 @@ import { OrdersService } from '../../../core/services/orders.service';
 import { AuthService } from '../../../core/authentication/auth.service';
 import { Pedido, Pago } from '../../../core/models/orders.model';
 import { sharedImports } from '../../../shared/shared.imports';
+import { SucursalService } from '../../../core/services/sucursales.service';
 
 @Component({
     selector: 'app-payment-form',
@@ -32,7 +33,8 @@ export class PaymentFormComponent implements OnInit {
     constructor(
         private fb: FormBuilder,
         private ordersService: OrdersService,
-        private authService: AuthService,
+        private sucursalesService: SucursalService,
+        public authService: AuthService,
         private route: ActivatedRoute,
         private router: Router,
         private snackBar: MatSnackBar
@@ -153,19 +155,29 @@ export class PaymentFormComponent implements OnInit {
     }
 
     liberarMesa(tableId: number): void {
-        // Usar el servicio de sucursales para liberar la mesa
-        const sucursalesService = this.route.snapshot.data['sucursalesService'];
+        // Obtener el servicio de sucursales del resolver
+        const sucursalesService = this.sucursalesService || this.route.snapshot.data['sucursalesService'];
+
         if (sucursalesService) {
             sucursalesService.freeTable(tableId).subscribe({
                 next: () => {
+                    this.snackBar.open('Mesa liberada exitosamente', 'Cerrar', {
+                        duration: 3000
+                    });
                     this.router.navigate(['/orders']);
                 },
                 error: (error) => {
                     console.error('Error freeing table', error);
+                    this.snackBar.open('Error al liberar la mesa, pero el pago fue procesado', 'Cerrar', {
+                        duration: 3000
+                    });
                     this.router.navigate(['/orders']);
                 }
             });
         } else {
+            this.snackBar.open('Pago procesado exitosamente', 'Cerrar', {
+                duration: 3000
+            });
             this.router.navigate(['/orders']);
         }
     }
