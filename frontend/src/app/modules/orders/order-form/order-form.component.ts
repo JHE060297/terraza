@@ -8,8 +8,10 @@ import { SucursalService } from '../../../core/services/sucursales.service';
 import { AuthService } from '../../../core/authentication/auth.service';
 import { InventoryService } from '../../../core/services/inventory.service';
 import { Mesa, Pedido, DetallePedido } from '../../../core/models/orders.model';
-import { Producto } from '../../../core/models/inventory.model';
+import { Producto, Inventario } from '../../../core/models/inventory.model';
 import { sharedImports } from '../../../shared/shared.imports';
+import { Observable, of, forkJoin } from 'rxjs';
+import { switchMap, map, catchError } from 'rxjs/operators';
 
 @Component({
     selector: 'app-order-form',
@@ -28,6 +30,8 @@ export class OrderFormComponent implements OnInit {
     error = '';
     tableId: number | null = null;
     currentOrder: Pedido | null = null;
+    inventoryMap: Map<number, Inventario> = new Map()
+    selectedBranchId: number | null = null
 
     constructor(
         private fb: FormBuilder,
@@ -93,6 +97,9 @@ export class OrderFormComponent implements OnInit {
 
         this.sucursalService.getTableById(this.tableId).subscribe({
             next: (table) => {
+
+                this.selectedBranchId = table.id_sucursal;
+
                 if (table.estado !== 'libre') {
                     // Si la mesa ya tiene un pedido activo, cargar ese pedido
                     this.loadExistingOrder(table.id_mesa);
@@ -164,6 +171,12 @@ export class OrderFormComponent implements OnInit {
         // Primero cargar el inventario con stock disponible
         this.inventoryService.getInventory({ id_sucursal: sucursalId }).subscribe({
             next: (inventory) => {
+
+                inventory.forEach(item => {
+                    this.inventoryMap.set(item.id_producto, item);
+                })
+
+
                 // Filtrar solo items con stock positivo
                 const itemsWithStock = inventory.filter(item => item.cantidad > 0);
 
@@ -197,6 +210,16 @@ export class OrderFormComponent implements OnInit {
         });
     }
 
+    hasEnoughStock(productId: number, requestedQuantity: number): boolean {
+        const inventoryItem = this.inventoryMap.get(productId)
+
+        if (!inventoryItem || inventoryItem.cantidad < requestedQuantity) {
+            return false
+        }
+
+        return true
+    }
+
     addProduct(): void {
         const productId = this.orderForm.get('producto')?.value;
         const cantidad = this.orderForm.get('cantidad')?.value;
@@ -211,12 +234,94 @@ export class OrderFormComponent implements OnInit {
         const product = this.products.find(p => p.id_producto === productId);
         if (!product) return;
 
-        // Verificar si ya existe el producto en los detalles
-        const existingDetail = this.orderDetails.find(d => d.id_producto === productId);
-        if (existingDetail) {
-            existingDetail.cantidad += cantidad;
-            existingDetail.subtotal = existingDetail.cantidad * existingDetail.precio_unitario;
+        // Check if we need to refresh inventory data first
+        if (!this.selectedBranchId) {
+            this.snackBar.open('No se pudo determinar la sucursal para verificar el stock', 'Cerrar', {
+                duration: 3000
+            });
+            return;
+        }
+
+        // If we don't have inventory data or it might be outdated, refresh it
+        if (this.inventoryMap.size === 0) {
+            this.isLoading = true;
+            this.inventoryService.getInventory({
+                id_sucursal: this.selectedBranchId,
+                id_producto: productId
+            }).subscribe({
+                next: (inventory) => {
+                    // Update inventory map
+                    inventory.forEach(item => {
+                        this.inventoryMap.set(item.id_producto, item);
+                    });
+                    this.isLoading = false;
+
+                    // Now process the product addition with updated inventory data
+                    this.processProductAddition(product, cantidad);
+                },
+                error: (error) => {
+                    this.isLoading = false;
+                    this.snackBar.open('Error al verificar el stock disponible', 'Cerrar', {
+                        duration: 3000
+                    });
+                    console.error('Error checking inventory', error);
+                }
+            });
         } else {
+            // We already have inventory data, proceed with the addition
+            this.processProductAddition(product, cantidad);
+        }
+    }
+
+    /**
+     * Process the product addition after inventory validation
+     */
+    private processProductAddition(product: Producto, cantidad: number): void {
+        // Check if the product already exists in the order
+        const existingDetail = this.orderDetails.find(d => d.id_producto === product.id_producto);
+
+        if (existingDetail) {
+            // Calculate total quantity needed
+            const totalQuantity = existingDetail.cantidad + cantidad;
+
+            // Verify stock for the total quantity
+            if (!this.hasEnoughStock(product.id_producto, totalQuantity)) {
+                const inventoryItem = this.inventoryMap.get(product.id_producto);
+                const availableStock = inventoryItem ? inventoryItem.cantidad : 0;
+
+                this.snackBar.open(
+                    `Stock insuficiente. Solo hay ${availableStock} unidades disponibles.`,
+                    'Cerrar',
+                    { duration: 5000 }
+                );
+                return;
+            }
+
+            // Update existing detail
+            existingDetail.cantidad = totalQuantity;
+            existingDetail.subtotal = existingDetail.cantidad * existingDetail.precio_unitario;
+
+            // Update local inventory tracking to reflect the change
+            const inventoryItem = this.inventoryMap.get(product.id_producto);
+            if (inventoryItem) {
+                inventoryItem.cantidad -= cantidad;
+                this.inventoryMap.set(product.id_producto, inventoryItem);
+            }
+        } else {
+            // Verify stock for a new product
+            if (!this.hasEnoughStock(product.id_producto, cantidad)) {
+                const inventoryItem = this.inventoryMap.get(product.id_producto);
+                const availableStock = inventoryItem ? inventoryItem.cantidad : 0;
+
+                this.snackBar.open(
+                    `Stock insuficiente. Solo hay ${availableStock} unidades disponibles.`,
+                    'Cerrar',
+                    { duration: 5000 }
+                );
+                return;
+            }
+
+            // Add new product to order
             const newDetail: Partial<DetallePedido> = {
                 id_producto: product.id_producto,
                 producto_nombre: product.nombre_producto,
@@ -224,14 +329,29 @@ export class OrderFormComponent implements OnInit {
                 precio_unitario: Number(product.precio_venta),
                 subtotal: cantidad * Number(product.precio_venta)
             };
+
             this.orderDetails.push(newDetail as DetallePedido);
+
+            // Update local inventory tracking
+            const inventoryItem = this.inventoryMap.get(product.id_producto);
+            if (inventoryItem) {
+                inventoryItem.cantidad -= cantidad;
+                this.inventoryMap.set(product.id_producto, inventoryItem);
+            }
         }
 
+        // Refresh the display
         this.orderDetails = [...this.orderDetails];
-
         this.updateTotal();
+
+        // Reset form fields
         this.orderForm.get('producto')?.reset();
         this.orderForm.get('cantidad')?.setValue(1);
+
+        // Show success message
+        this.snackBar.open('Producto agregado al pedido', 'Cerrar', {
+            duration: 3000
+        });
     }
 
     removeProduct(detail: DetallePedido): void {
@@ -242,6 +362,13 @@ export class OrderFormComponent implements OnInit {
             // Si no tiene ID, solo lo removemos del array local
             const index = this.orderDetails.indexOf(detail);
             if (index > -1) {
+                // Add the quantity back to our local inventory tracking
+                if (this.inventoryMap.has(detail.id_producto)) {
+                    const inventoryItem = this.inventoryMap.get(detail.id_producto)!;
+                    inventoryItem.cantidad += detail.cantidad;
+                    this.inventoryMap.set(detail.id_producto, inventoryItem);
+                }
+
                 this.orderDetails.splice(index, 1);
                 this.updateTotal();
             }
@@ -255,6 +382,13 @@ export class OrderFormComponent implements OnInit {
             next: () => {
                 const index = this.orderDetails.indexOf(detail);
                 if (index > -1) {
+                    // Add the quantity back to our local inventory tracking
+                    if (this.inventoryMap.has(detail.id_producto)) {
+                        const inventoryItem = this.inventoryMap.get(detail.id_producto)!;
+                        inventoryItem.cantidad += detail.cantidad;
+                        this.inventoryMap.set(detail.id_producto, inventoryItem);
+                    }
+
                     this.orderDetails.splice(index, 1);
                     this.updateTotal();
                 }
@@ -336,13 +470,15 @@ export class OrderFormComponent implements OnInit {
     addDetailsToOrder(orderId: number): void {
         const newDetails = this.orderDetails.filter(d => !d.id_detalle_pedido);
         let detailsAdded = 0;
+        let detailErrors = 0;
 
         if (newDetails.length === 0) {
             this.finalizeOrder();
             return;
         }
 
-        newDetails.forEach(detail => {
+        // Create an array of observables for all detail additions
+        const detailRequests = newDetails.map(detail => {
             const detailData = {
                 id_pedido: orderId,
                 id_producto: detail.id_producto,
@@ -357,21 +493,38 @@ export class OrderFormComponent implements OnInit {
                 precio_unitario: 0 // Asumiendo que el backend calculará este valor
             };
 
-            this.ordersService.createOrderDetail(fullDetailData).subscribe({
-                next: () => {
-                    detailsAdded++;
-                    if (detailsAdded === newDetails.length) {
-                        this.finalizeOrder();
-                    }
-                },
-                error: (error) => {
-                    this.isSubmitting = false;
+            return this.ordersService.createOrderDetail(fullDetailData).pipe(
+                map(() => true),
+                catchError(error => {
                     console.error('Error adding order detail', error);
-                    this.snackBar.open('Error al agregar productos', 'Cerrar', {
-                        duration: 3000
-                    });
+                    return of(false);
+                })
+            );
+        });
+
+        // Execute all requests in parallel
+        forkJoin(detailRequests).subscribe({
+            next: (results) => {
+                // Count successes and failures
+                const successCount = results.filter(success => success).length;
+                const failureCount = results.length - successCount;
+
+                if (failureCount > 0) {
+                    this.snackBar.open(
+                        `Advertencia: ${failureCount} productos no pudieron ser agregados debido a insuficiente stock.`,
+                        'Cerrar',
+                        { duration: 5000 }
+                    );
                 }
-            });
+
+                this.finalizeOrder();
+            },
+            error: () => {
+                this.isSubmitting = false;
+                this.snackBar.open('Error al agregar productos al pedido', 'Cerrar', {
+                    duration: 3000
+                });
+            }
         });
     }
 
