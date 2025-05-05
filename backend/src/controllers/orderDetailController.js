@@ -103,65 +103,89 @@ const createOrderDetail = async (req, res) => {
             return res.status(400).json({ error: 'No hay suficiente stock del producto seleccionado' });
         }
 
-        // Crear el detalle del pedido y actualizar el total en una transacción
-        const result = await prisma.$transaction(async (prisma) => {
-            // Crear el detalle del pedido
-            const newDetalle = await prisma.detallePedido.create({
-                data: {
-                    id_pedido: parseInt(id_pedido),
-                    id_producto: parseInt(id_producto),
-                    cantidad: parseInt(cantidad),
-                    precio_unitario: producto.precio_venta
-                },
-                include: {
-                    producto: {
-                        select: {
-                            nombre_producto: true,
-                            precio_venta: true
+        // Implementar lógica de reintento para la transacción
+        const maxRetries = 3;
+        let retries = 0;
+        let result;
+
+        while (retries < maxRetries) {
+            try {
+                // Ejecutar la transacción
+                result = await prisma.$transaction(async (prisma) => {
+                    // Crear el detalle del pedido
+                    const newDetalle = await prisma.detallePedido.create({
+                        data: {
+                            id_pedido: parseInt(id_pedido),
+                            id_producto: parseInt(id_producto),
+                            cantidad: parseInt(cantidad),
+                            precio_unitario: producto.precio_venta
+                        },
+                        include: {
+                            producto: {
+                                select: {
+                                    nombre_producto: true,
+                                    precio_venta: true
+                                }
+                            }
                         }
+                    });
+
+                    // Calcular el subtotal
+                    const subtotal = parseFloat(cantidad) * parseFloat(producto.precio_venta);
+
+                    // Actualizar el total del pedido
+                    const updatedPedido = await prisma.pedido.update({
+                        where: { id_pedido: parseInt(id_pedido) },
+                        data: {
+                            total: {
+                                increment: subtotal
+                            }
+                        }
+                    });
+
+                    // Crear la transacción de inventario
+                    await prisma.transaccionInventario.create({
+                        data: {
+                            id_producto: parseInt(id_producto),
+                            id_sucursal: mesa.id_sucursal,
+                            cantidad: -parseInt(cantidad), // Cantidad negativa porque es una venta
+                            tipo_transaccion: 'venta',
+                            id_usuario: req.user ? req.user.user_id : null
+                        }
+                    });
+
+                    // Actualizar el inventario
+                    await prisma.inventario.update({
+                        where: { id_inventario: inventario.id_inventario },
+                        data: {
+                            cantidad: {
+                                decrement: parseInt(cantidad)
+                            }
+                        }
+                    });
+
+                    return {
+                        detalle: newDetalle,
+                        pedido: updatedPedido
+                    };
+                });
+
+                // Si la transacción tiene éxito, romper el ciclo de reintento
+                break;
+            } catch (error) {
+                // Solo reintentar si es un error de conflicto transaccional
+                if (error.code === 'P2034') {
+                    retries++;
+                    if (retries >= maxRetries) {
+                        throw error; // Máximo de reintentos alcanzado, propagar el error
                     }
+                    // Esperar un poco antes de reintentar (backoff exponencial)
+                    await new Promise(resolve => setTimeout(resolve, 100 * Math.pow(2, retries)));
+                } else {
+                    throw error; // No es un error de conflicto, propagarlo
                 }
-            });
-
-            // Calcular el subtotal
-            const subtotal = parseFloat(cantidad) * parseFloat(producto.precio_venta);
-
-            // Actualizar el total del pedido
-            const updatedPedido = await prisma.pedido.update({
-                where: { id_pedido: parseInt(id_pedido) },
-                data: {
-                    total: {
-                        increment: subtotal
-                    }
-                }
-            });
-
-            // Crear la transacción de inventario
-            await prisma.transaccionInventario.create({
-                data: {
-                    id_producto: parseInt(id_producto),
-                    id_sucursal: mesa.id_sucursal,
-                    cantidad: -parseInt(cantidad), // Cantidad negativa porque es una venta
-                    tipo_transaccion: 'venta',
-                    id_usuario: req.user ? req.user.user_id : null
-                }
-            });
-
-            // Actualizar el inventario
-            await prisma.inventario.update({
-                where: { id_inventario: inventario.id_inventario },
-                data: {
-                    cantidad: {
-                        decrement: parseInt(cantidad)
-                    }
-                }
-            });
-
-            return {
-                detalle: newDetalle,
-                pedido: updatedPedido
-            };
-        });
+            }
+        }
 
         // Transformar los datos para la respuesta
         const transformedDetalle = {

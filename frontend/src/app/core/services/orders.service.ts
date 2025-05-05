@@ -104,19 +104,15 @@ export class OrdersService {
 
     // Pagos
     getPayments(filters?: any): Observable<Pago[]> {
-        let url = `${this.apiUrl}pagos/`;
+        let params = new HttpParams();
         if (filters) {
-            const params = new URLSearchParams();
             Object.keys(filters).forEach(key => {
                 if (filters[key] !== null && filters[key] !== undefined) {
-                    params.set(key, filters[key]);
+                    params = params.set(key, filters[key]);
                 }
             });
-            if (params.toString()) {
-                url += `?${params.toString()}`;
-            }
         }
-        return this.http.get<Pago[]>(url);
+        return this.http.get<Pago[]>(`${this.apiUrl}pagos/`, { params });
     }
 
     getPaymentById(id: number): Observable<Pago> {
