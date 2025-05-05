@@ -260,8 +260,7 @@ const createPayment = async (req, res) => {
                     id_pedido: parseInt(id_pedido),
                     id_usuario: parseInt(id_usuario),
                     monto: parseFloat(monto),
-                    metodo_pago,
-                    referencia_pago
+                    metodo_pago
                 }
             });
 

@@ -48,5 +48,4 @@ export interface Pago {
     monto: number;
     metodo_pago: 'efectivo' | 'tarjeta' | 'nequi' | 'daviplata';
     fecha_hora: string;
-    referencia_pago?: string;
 }

@@ -57,7 +57,7 @@ export class TablesViewComponent implements OnInit, OnDestroy {
                 this.userBranchId = user.id_sucursal;
                 this.selectedBranchId = user.id_sucursal;
 
-                this.startAutoRefresh();
+                this.loadInitialDate();
             }
         });
     }
@@ -89,7 +89,7 @@ export class TablesViewComponent implements OnInit, OnDestroy {
             branches: branches$,
         }).pipe(
             finalize(() => {
-                this.startAutoRefresh();
+                this.loadData();
             })
         ).subscribe(result => {
             if (this.isAdmin) {

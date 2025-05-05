@@ -84,16 +84,6 @@
                     </mat-error>
                 </mat-form-field>
 
-                <!-- Referencia de pago -->
-                <mat-form-field appearance="outline" class="full-width"
-                    *ngIf="paymentForm.get('metodo_pago')?.value && paymentForm.get('metodo_pago')?.value !== 'efectivo'">
-                    <mat-label>Referencia de Pago</mat-label>
-                    <input matInput formControlName="referencia_pago" placeholder="Ej: Número de transacción">
-                    <mat-error *ngIf="paymentForm.get('referencia_pago')?.hasError('required')">
-                        La referencia de pago es requerida para este método
-                    </mat-error>
-                </mat-form-field>
-
                 <!-- Botones de acción -->
                 <div class="form-actions">
                     <button mat-button type="button" (click)="cancel()" [disabled]="isSubmitting">

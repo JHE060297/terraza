@@ -67,8 +67,7 @@ export class PaymentFormComponent implements OnInit {
         return this.fb.group({
             id_pedido: ['', [Validators.required]],
             monto: [{ value: 0, disabled: true }, [Validators.required]],
-            metodo_pago: ['', [Validators.required]],
-            referencia_pago: ['']
+            metodo_pago: ['', [Validators.required]]
         });
     }
 
@@ -101,20 +100,6 @@ export class PaymentFormComponent implements OnInit {
         });
     }
 
-    onPaymentMethodChange(): void {
-        const selectedMethod = this.paymentForm.get('metodo_pago')?.value;
-        const referenciaControl = this.paymentForm.get('referencia_pago');
-
-        // Si es pago electrónico, la referencia es requerida
-        if (selectedMethod && selectedMethod !== 'efectivo') {
-            referenciaControl?.setValidators([Validators.required]);
-        } else {
-            referenciaControl?.clearValidators();
-        }
-
-        referenciaControl?.updateValueAndValidity();
-    }
-
     onSubmit(): void {
         if (this.paymentForm.invalid) {
             this.snackBar.open('Por favor, complete todos los campos requeridos', 'Cerrar', {
@@ -128,7 +113,6 @@ export class PaymentFormComponent implements OnInit {
             id_pedido: this.paymentForm.get('id_pedido')?.value,
             monto: this.order?.total,
             metodo_pago: this.paymentForm.get('metodo_pago')?.value,
-            referencia_pago: this.paymentForm.get('referencia_pago')?.value ?? ''
         };
 
         const fullPaymentData: Pago = {
@@ -138,7 +122,6 @@ export class PaymentFormComponent implements OnInit {
             monto: paymentData.monto ?? 0,
             metodo_pago: paymentData.metodo_pago as 'efectivo' | 'tarjeta' | 'nequi' | 'daviplata',
             fecha_hora: new Date().toISOString(),
-            referencia_pago: paymentData.referencia_pago
         };
 
         this.ordersService.createPayment(fullPaymentData).subscribe({
