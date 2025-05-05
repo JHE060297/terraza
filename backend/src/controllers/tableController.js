@@ -177,13 +177,15 @@ const createTable = async (req, res) => {
         const estadosValidos = ['libre', 'ocupada', 'pagado'];
         const estadoToUse = estado && estadosValidos.includes(estado) ? estado : 'libre';
 
+        const isActiveValue = is_active === undefined ? true : is_active === 'true' || is_active === true;
+
         // Crear la mesa
         const newMesa = await prisma.mesa.create({
             data: {
                 numero: parseInt(numero),
                 id_sucursal: parseInt(id_sucursal),
                 estado: estadoToUse,
-                is_active: is_active !== undefined ? is_active === 'true' : true
+                is_active: isActiveValue
             },
             include: {
                 sucursal: {

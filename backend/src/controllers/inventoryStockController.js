@@ -64,10 +64,15 @@ const getAllInventory = async (req, res) => {
             }
         })
 
+        inventario = inventario.map(item => ({
+            ...item,
+            is_low_stock: item.cantidad <= item.alerta
+        }));
+
         // Filtrar low stock después de obtener los datos
         const is_low_stock = req.query.is_low_stock;
         if (is_low_stock && (is_low_stock === 'true' || is_low_stock === '1' || is_low_stock === 'yes')) {
-            inventario = inventario.filter(item => item.cantidad <= item.alerta);
+            inventario = inventario.filter(item => item.is_low_stock);
         }
 
         // Obtener productos 

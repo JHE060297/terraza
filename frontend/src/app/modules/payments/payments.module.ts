@@ -4,14 +4,14 @@ import { RouterModule, Routes } from '@angular/router';
 import { SharedModule } from '../../shared/shared.module';
 import { authGuard } from '../../core/guards/auth.guard';
 import { roleGuard } from '../../core/guards/role.guard';
-import { PlaceholderComponent } from '../../shared/components/placeholder/placeholder.component';
 import { PaymentFormComponent } from './payment-form/payment-form.component';
 import { SucursalServiceResolver } from './sucursal-service.resolver';
+import { PaymentsListComponent } from './payments-list/payments-list.component';
 
 const routes: Routes = [
   {
     path: '',
-    component: PlaceholderComponent,
+    component: PaymentsListComponent,
     canActivate: [authGuard, roleGuard],
     data: {
       roles: ['administrador', 'cajero'],
@@ -38,7 +38,7 @@ const routes: Routes = [
     CommonModule,
     SharedModule,
     PaymentFormComponent,
-
+    PaymentsListComponent,
     RouterModule.forChild(routes)
   ],
   exports: [RouterModule]

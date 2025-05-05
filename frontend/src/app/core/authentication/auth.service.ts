@@ -139,7 +139,10 @@ export class AuthService {
 
     // Verificar por tipo de rol
     isAdmin(): boolean {
-        return this.hasRole('administrador');
+        const user = this.currentUserSubject.value;
+        if (!user) return false;
+
+        return user.rol_nombre === 'admin' || user.rol_nombre === 'administrador';
     }
 
     isCajero(): boolean {

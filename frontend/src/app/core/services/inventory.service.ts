@@ -139,7 +139,7 @@ export class InventoryService {
     }
 
     getLowStockItems(): Observable<Inventario[]> {
-        return this.http.get<Inventario[]>(`${this.apiUrl}inventario/low-stock/`);
+        return this.getInventory({ is_low_stock: true });
     }
 
     getProductInventoryByBranch(productId: number, branchId: number): Observable<Inventario> {

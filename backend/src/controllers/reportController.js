@@ -1,3 +1,4 @@
+// En backend/src/controllers/reportController.js
 const { PrismaClient } = require('@prisma/client');
 const { validationResult } = require('express-validator');
 const XLSX = require('xlsx');
@@ -37,6 +38,18 @@ const generateSalesReport = async (req, res) => {
         const resumen = result[0][0]; // Primera tabla: resumen
         const detalles = result[1];   // Segunda tabla: detalles por producto
 
+        // Guardar el reporte generado en la base de datos
+        const reporte = await prisma.reporte.create({
+            data: {
+                usuario: userId,
+                sucursal: id_sucursal ? parseInt(id_sucursal) : null,
+                fecha_generacion: new Date(),
+                fecha_inicio: new Date(fecha_inicio),
+                fecha_fin: new Date(fecha_fin),
+                formato
+            }
+        });
+
         // Preparar respuesta según el formato solicitado
         if (formato === 'json') {
             return res.json({
@@ -46,7 +59,8 @@ const generateSalesReport = async (req, res) => {
                 fecha_inicio,
                 fecha_fin,
                 id_sucursal,
-                id_usuario: userId
+                id_usuario: userId,
+                id_reporte: reporte.id_reporte
             });
         } else if (formato === 'xlsx' || formato === 'csv') {
             // Crear el archivo Excel o CSV

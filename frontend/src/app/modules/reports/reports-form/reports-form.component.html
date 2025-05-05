@@ -1,0 +1,88 @@
+<div class="reports-form-container">
+    <div class="page-header">
+        <h1>Generar Reporte</h1>
+        <p>Complete los parámetros para generar un reporte de ventas</p>
+    </div>
+
+    <mat-card>
+        <mat-card-content>
+            <!-- Mensaje de error -->
+            <div *ngIf="error" class="error-message">
+                {{ error }}
+            </div>
+
+            <!-- Indicador de carga -->
+            <div *ngIf="isLoading" class="loading-container">
+                <mat-spinner diameter="40"></mat-spinner>
+                <p>Cargando datos...</p>
+            </div>
+
+            <!-- Formulario -->
+            <form *ngIf="!isLoading" [formGroup]="reportForm" (ngSubmit)="onSubmit()" class="report-form">
+                <div class="form-row">
+                    <!-- Fecha de inicio -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Fecha de inicio</mat-label>
+                        <input matInput [matDatepicker]="pickerStart" formControlName="fecha_inicio">
+                        <mat-datepicker-toggle matSuffix [for]="pickerStart"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerStart></mat-datepicker>
+                        <mat-error *ngIf="reportForm.get('fecha_inicio')?.hasError('required')">
+                            La fecha de inicio es requerida
+                        </mat-error>
+                    </mat-form-field>
+
+                    <!-- Fecha de fin -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Fecha de fin</mat-label>
+                        <input matInput [matDatepicker]="pickerEnd" formControlName="fecha_fin">
+                        <mat-datepicker-toggle matSuffix [for]="pickerEnd"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerEnd></mat-datepicker>
+                        <mat-error *ngIf="reportForm.get('fecha_fin')?.hasError('required')">
+                            La fecha de fin es requerida
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                    <!-- Sucursal (solo para admin) -->
+                    <mat-form-field appearance="outline" *ngIf="isAdmin">
+                        <mat-label>Sucursal</mat-label>
+                        <mat-select formControlName="sucursal">
+                            <mat-option [value]="null">Todas las sucursales</mat-option>
+                            <mat-option *ngFor="let branch of branches" [value]="branch.id_sucursal">
+                                {{ branch.nombre_sucursal }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <!-- Formato -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Formato</mat-label>
+                        <mat-select formControlName="formato">
+                            <mat-option *ngFor="let format of formatOptions" [value]="format.value">
+                                {{ format.label }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="reportForm.get('formato')?.hasError('required')">
+                            El formato es requerido
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Botones de acción -->
+                <div class="form-actions">
+                    <button mat-button type="button" (click)="cancel()" [disabled]="isSubmitting">
+                        Cancelar
+                    </button>
+                    <button mat-raised-button color="primary" type="submit"
+                        [disabled]="reportForm.invalid || isSubmitting">
+                        <mat-icon *ngIf="isSubmitting">
+                            <mat-spinner diameter="20"></mat-spinner>
+                        </mat-icon>
+                        <span *ngIf="!isSubmitting">Generar Reporte</span>
+                    </button>
+                </div>
+            </form>
+        </mat-card-content>
+    </mat-card>
+</div>

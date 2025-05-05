@@ -1,7 +1,9 @@
+// En frontend/src/app/core/services/reports.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { Reporte, ResumenVentas, DetalleVentaProducto } from '../models/reports.model';
 
 @Injectable({
     providedIn: 'root'
@@ -33,5 +35,15 @@ export class ReportsService {
         a.click();
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
+    }
+
+    // Obtener todos los reportes generados
+    getReports(): Observable<Reporte[]> {
+        return this.http.get<Reporte[]>(`${this.apiUrl}`);
+    }
+
+    // Obtener un reporte específico
+    getReportById(id: number): Observable<Reporte> {
+        return this.http.get<Reporte>(`${this.apiUrl}${id}`);
     }
 }

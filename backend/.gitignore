@@ -36,3 +36,4 @@ Thumbs.db
 *.swo
 
 prisma/migrations/
+storedProcedure.sql

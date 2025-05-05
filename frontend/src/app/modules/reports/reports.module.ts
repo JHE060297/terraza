@@ -1,21 +1,18 @@
-
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
 import { SharedModule } from '../../shared/shared.module';
 import { authGuard } from '../../core/guards/auth.guard';
 import { roleGuard } from '../../core/guards/role.guard';
-import { PlaceholderComponent } from '../../shared/components/placeholder/placeholder.component';
+import { ReportsFormComponent } from './reports-form/reports-form.component';
 
 const routes: Routes = [
   {
     path: '',
-    component: PlaceholderComponent,
+    component: ReportsFormComponent,
     canActivate: [authGuard, roleGuard],
     data: {
-      roles: ['administrador', 'cajero'],
-      title: 'Reportes',
-      message: 'El módulo de reportes estará disponible próximamente. Aquí podrás generar y visualizar reportes de ventas y ganancias.'
+      roles: ['administrador', 'cajero']
     }
   }
 ];
@@ -25,6 +22,7 @@ const routes: Routes = [
   imports: [
     CommonModule,
     SharedModule,
+    ReportsFormComponent,
     RouterModule.forChild(routes)
   ],
   exports: [RouterModule]
