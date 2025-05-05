@@ -47,7 +47,7 @@
 
                 <!-- Tabla de detalles -->
                 <h3>Productos en el pedido</h3>
-                <table mat-table [dataSource]="order.detalles" class="full-width">
+                <table mat-table [dataSource]="order?.detalles || []" class="full-width">
                     <!-- Columna de producto -->
                     <ng-container matColumnDef="producto">
                         <th mat-header-cell *matHeaderCellDef>Producto</th>

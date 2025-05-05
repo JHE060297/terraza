@@ -23,7 +23,7 @@
                 <!-- Selector de mesa (deshabilitado si ya existe un pedido) -->
                 <mat-form-field appearance="outline" class="full-width" [ngClass]="{'disabled-field': currentOrder}">
                     <mat-label>Mesa</mat-label>
-                    <mat-select formControlName="id_mesa" [disabled]="currentOrder">
+                    <mat-select formControlName="id_mesa" [disabled]="!!currentOrder">
                         <mat-option *ngFor="let table of availableTables" [value]="table.id_mesa">
                             Mesa {{ table.numero }} - {{ table.nombre_sucursal }}
                         </mat-option>

@@ -26,7 +26,7 @@ export class OrdersViewComponent implements OnInit {
     constructor(
         private ordersService: OrdersService,
         private sucursalService: SucursalService,
-        private authService: AuthService,
+        public authService: AuthService,
         private router: Router,
         private snackBar: MatSnackBar,
         private dialog: MatDialog
@@ -118,7 +118,7 @@ export class OrdersViewComponent implements OnInit {
             if (result) {
                 this.ordersService.changeOrderStatus(order.id_pedido, newStatus).subscribe({
                     next: () => {
-                        order.estado = newStatus;
+                        order.estado = newStatus as "pagado" | "pendiente" | "entregado";
                         this.snackBar.open('Estado actualizado correctamente', 'Cerrar', {
                             duration: 3000
                         });

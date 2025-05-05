@@ -105,6 +105,7 @@ export class OrderFormComponent implements OnInit {
     }
 
     loadExistingOrder(tableId: number): void {
+
         this.ordersService.getOrdersByTable(tableId).subscribe({
             next: (orders) => {
                 const activeOrder = orders.find(o => o.estado !== 'pagado');
@@ -244,7 +245,16 @@ export class OrderFormComponent implements OnInit {
             id_mesa: this.orderForm.get('id_mesa')?.value
         };
 
-        this.ordersService.createOrder(orderData).subscribe({
+        const fullOrderData: Pedido = {
+            id_mesa: orderData.id_mesa,
+            id_pedido: 0, // El backend asignará el ID real
+            estado: 'pendiente',
+            total: 0, // Se actualizará con los detalles
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+        };
+
+        this.ordersService.createOrder(fullOrderData).subscribe({
             next: (order) => {
                 this.currentOrder = order;
                 this.addDetailsToOrder(order.id_pedido);
@@ -284,7 +294,15 @@ export class OrderFormComponent implements OnInit {
                 cantidad: detail.cantidad
             };
 
-            this.ordersService.createOrderDetail(detailData).subscribe({
+            const fullDetailData: DetallePedido = {
+                id_pedido: detailData.id_pedido,
+                id_producto: detailData.id_producto,
+                cantidad: detailData.cantidad,
+                id_detalle_pedido: 0, // El backend asignará el ID real
+                precio_unitario: 0 // Asumiendo que el backend calculará este valor
+            };
+
+            this.ordersService.createOrderDetail(fullDetailData).subscribe({
                 next: () => {
                     detailsAdded++;
                     if (detailsAdded === newDetails.length) {

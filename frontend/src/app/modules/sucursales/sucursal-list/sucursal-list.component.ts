@@ -24,16 +24,7 @@ import { sharedImports } from '../../../shared/shared.imports';
     selector: 'app-sucursal-list',
     standalone: true,
     imports: [
-        CommonModule,
-        MatButtonModule,
-        MatIconModule,
-        MatTableModule,
-        MatPaginatorModule,
-        MatSortModule,
-        MatDialogModule,
-        MatSnackBarModule,
-        ConfirmDialogComponent,
-        ...sharedImports
+        sharedImports
     ],
     templateUrl: './sucursal-list.component.html',
     styleUrls: ['./sucursal-list.component.scss']
@@ -122,13 +113,13 @@ export class SucursalListComponent implements OnInit {
                     error: (error) => {
                         // Mejorar el manejo de errores mostrando el mensaje específico del backend
                         let errorMessage = 'Error al eliminar sucursal';
-                        
+
                         if (error.error && error.error.message) {
                             errorMessage = error.error.message;
                         } else if (error.error && typeof error.error === 'string') {
                             errorMessage = error.error;
                         }
-                        
+
                         this.snackBar.open(errorMessage, 'Cerrar', {
                             duration: 5000
                         });

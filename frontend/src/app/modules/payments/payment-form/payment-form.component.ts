@@ -128,10 +128,20 @@ export class PaymentFormComponent implements OnInit {
             id_pedido: this.paymentForm.get('id_pedido')?.value,
             monto: this.order?.total,
             metodo_pago: this.paymentForm.get('metodo_pago')?.value,
-            referencia_pago: this.paymentForm.get('referencia_pago')?.value || ''
+            referencia_pago: this.paymentForm.get('referencia_pago')?.value ?? ''
         };
-        
-        this.ordersService.createPayment(paymentData).subscribe({
+
+        const fullPaymentData: Pago = {
+            id_pago: 0, // El backend asignará el ID real
+            id_pedido: paymentData.id_pedido,
+            id_usuario: this.authService.currentUserSubject.value?.id_usuario ?? 0,
+            monto: paymentData.monto ?? 0,
+            metodo_pago: paymentData.metodo_pago as 'efectivo' | 'tarjeta' | 'nequi' | 'daviplata',
+            fecha_hora: new Date().toISOString(),
+            referencia_pago: paymentData.referencia_pago
+        };
+
+        this.ordersService.createPayment(fullPaymentData).subscribe({
             next: (payment) => {
                 this.snackBar.open('Pago procesado exitosamente', 'Cerrar', {
                     duration: 3000
