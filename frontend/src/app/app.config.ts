@@ -9,7 +9,7 @@ import { AppInitService } from './app-init.service';
 
 export function initializeApp(appInitService: AppInitService) {
   return () => appInitService.initializeApp();
-}
+} 
 
 export const appConfig: ApplicationConfig = {
   providers: [

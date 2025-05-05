@@ -12,6 +12,7 @@ import { catchError, finalize } from 'rxjs/operators';
 
 @Component({
     selector: 'app-table-detail',
+    standalone: true,
     imports: [sharedImports],
     templateUrl: './table-detail.component.html',
     styleUrls: ['./table-detail.component.scss']

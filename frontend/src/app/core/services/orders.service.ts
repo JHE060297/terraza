@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
@@ -21,15 +21,13 @@ export class OrdersService {
     getOrders(filters?: any): Observable<Pedido[]> {
         let url = `${this.apiUrl}pedidos/`;
         if (filters) {
-            const params = new URLSearchParams();
+            let params = new HttpParams();
             Object.keys(filters).forEach(key => {
                 if (filters[key] !== null && filters[key] !== undefined) {
-                    params.set(key, filters[key]);
+                    params = params.set(key, filters[key].toString());
                 }
             });
-            if (params.toString()) {
-                url += `?${params.toString()}`;
-            }
+            return this.http.get<Pedido[]>(url, { params });
         }
         return this.http.get<Pedido[]>(url);
     }

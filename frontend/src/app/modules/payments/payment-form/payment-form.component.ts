@@ -128,9 +128,9 @@ export class PaymentFormComponent implements OnInit {
             id_pedido: this.paymentForm.get('id_pedido')?.value,
             monto: this.order?.total,
             metodo_pago: this.paymentForm.get('metodo_pago')?.value,
-            referencia_pago: this.paymentForm.get('referencia_pago')?.value
+            referencia_pago: this.paymentForm.get('referencia_pago')?.value || ''
         };
-
+        
         this.ordersService.createPayment(paymentData).subscribe({
             next: (payment) => {
                 this.snackBar.open('Pago procesado exitosamente', 'Cerrar', {

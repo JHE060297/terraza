@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
@@ -61,19 +61,15 @@ export class InventoryService {
 
     // Inventario
     getInventory(filters?: any): Observable<Inventario[]> {
-
-
         let url = `${this.apiUrl}inventario/`;
         if (filters) {
-            const params = new URLSearchParams();
+            let params = new HttpParams();
             Object.keys(filters).forEach(key => {
                 if (filters[key] !== null && filters[key] !== undefined) {
-                    params.set(key, filters[key]);
+                    params = params.set(key, filters[key].toString());
                 }
             });
-            if (params.toString()) {
-                url += `?${params.toString()}`;
-            }
+            return this.http.get<Inventario[]>(url, { params });
         }
         return this.http.get<Inventario[]>(url);
     }
@@ -99,16 +95,16 @@ export class InventoryService {
         if (!id || isNaN(id)) {
             throw new Error('ID de inventario inválido');
         }
-        
+
         // Asegurarse de que la URL y el formato de los datos sean correctos
         const url = `${this.apiUrl}inventario/${id}/adjust_stock/`;
-        
+
         console.log('Enviando ajuste de inventario:', {
             url,
             id,
             adjustment
         });
-        
+
         return this.http.post<any>(url, adjustment);
     }
 

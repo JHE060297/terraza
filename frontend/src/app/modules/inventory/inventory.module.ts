@@ -24,14 +24,12 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  declarations: [],
   imports: [
     CommonModule,
-    SharedModule,
+    RouterModule.forChild(routes),
     InventoryStockComponent,
     InventoryTransactionsComponent,
     StockAdjustmentDialogComponent,
-    RouterModule.forChild(routes)
   ],
   exports: [RouterModule]
 })

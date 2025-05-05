@@ -145,15 +145,12 @@ export class TablesViewComponent implements OnInit, OnDestroy {
             filters.is_active = true;
         }
 
-        const tables$ = this.sucursalesServices.getTables(filters).pipe(
-            catchError(() => {
+        return this.sucursalesServices.getTables(filters).pipe(
+            catchError((error) => {
                 this.error = 'Error al cargar mesas';
+                console.error('Error loading tables', error);
                 return of([]);
-            })
-        );
-
-        // Retornar las tablas
-        return tables$.pipe(
+            }),
             map(tables => ({ tables }))
         );
     }
