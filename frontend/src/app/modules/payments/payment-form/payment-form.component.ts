@@ -100,6 +100,10 @@ export class PaymentFormComponent implements OnInit {
         });
     }
 
+    onPaymentMethodChange(): void {
+        // Este método se llama cuando cambia el método de pago
+    }
+
     onSubmit(): void {
         if (this.paymentForm.invalid) {
             this.snackBar.open('Por favor, complete todos los campos requeridos', 'Cerrar', {

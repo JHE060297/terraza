@@ -174,6 +174,8 @@ export class OrderFormComponent implements OnInit {
             this.orderDetails.push(newDetail as DetallePedido);
         }
 
+        this.orderDetails = [...this.orderDetails];
+
         this.updateTotal();
         this.orderForm.get('producto')?.reset();
         this.orderForm.get('cantidad')?.setValue(1);

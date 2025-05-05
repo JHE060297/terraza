@@ -14,13 +14,15 @@ export class ReportsService {
     constructor(private http: HttpClient) { }
 
     generateReport(reportData: any): Observable<Blob | any> {
+        const endpoint = 'generate';
+
         // Si el formato es JSON, devolvemos un objeto JSON
         if (reportData.formato === 'json') {
-            return this.http.post<any>(`${this.apiUrl}generate`, reportData);
+            return this.http.post<any>(`${this.apiUrl}${endpoint}`, reportData);
         }
 
         // Si es xlsx o csv, devolvemos un Blob
-        return this.http.post(`${this.apiUrl}generate`, reportData, {
+        return this.http.post(`${this.apiUrl}${endpoint}`, reportData, {
             responseType: 'blob'
         });
     }

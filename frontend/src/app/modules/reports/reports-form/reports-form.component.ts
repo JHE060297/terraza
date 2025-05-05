@@ -43,6 +43,8 @@ export class ReportsFormComponent implements OnInit {
     }
 
     ngOnInit(): void {
+
+        console.log('ReportsFormComponent inicializado');
         // Verificar roles
         this.isAdmin = this.authService.isAdmin();
 
@@ -62,6 +64,8 @@ export class ReportsFormComponent implements OnInit {
     }
 
     createForm(): FormGroup {
+        console.log('Creando formulario');
+
         // Establecer las fechas por defecto (último mes)
         const today = new Date();
         const lastMonth = new Date();
@@ -103,6 +107,8 @@ export class ReportsFormComponent implements OnInit {
 
         this.isSubmitting = true;
         const formValues = this.reportForm.getRawValue(); // Obtener valores incluso de campos deshabilitados
+
+        console.log('Enviando datos para reporte:', formValues);
 
         // Preparar el objeto para la solicitud
         const reportData = {

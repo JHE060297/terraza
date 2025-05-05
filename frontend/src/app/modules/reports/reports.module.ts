@@ -14,6 +14,14 @@ const routes: Routes = [
     data: {
       roles: ['administrador', 'cajero']
     }
+  },
+  {
+    path: 'new',
+    component: ReportsFormComponent,
+    canActivate: [authGuard, roleGuard],
+    data: {
+      roles: ['administrador', 'cajero']
+    }
   }
 ];
 
