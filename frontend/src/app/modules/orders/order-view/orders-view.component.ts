@@ -46,6 +46,10 @@ export class OrdersViewComponent implements OnInit {
             filters.id_mesa__id_sucursal = currentUser.id_sucursal;
         }
 
+        if (this.statusFilter) {
+            filters.estado = this.statusFilter;
+        }
+
         this.ordersService.getOrders(filters).subscribe({
             next: (orders) => {
                 this.orders = orders;

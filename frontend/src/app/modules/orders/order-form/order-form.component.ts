@@ -133,13 +133,66 @@ export class OrderFormComponent implements OnInit {
     }
 
     loadProducts(): void {
-        this.inventoryService.getProducts({ is_active: true }).subscribe({
-            next: (products) => {
-                this.products = products;
+        // Obtener la sucursal del usuario actual o la mesa seleccionada
+        const currentUser = this.authService.currentUserSubject.value;
+        let sucursalId = currentUser?.id_sucursal;
+
+        // Si ya hay una mesa seleccionada, obtener su sucursal
+        if (this.tableId) {
+            this.sucursalService.getTableById(this.tableId).subscribe({
+                next: (table) => {
+                    sucursalId = table.id_sucursal;
+                    this.loadProductsWithStock(sucursalId);
+                },
+                error: (error) => {
+                    console.error('Error loading table details', error);
+                    // Cargar con la sucursal del usuario si falla la mesa
+                    this.loadProductsWithStock(sucursalId);
+                }
+            });
+        } else {
+            this.loadProductsWithStock(sucursalId);
+        }
+    }
+
+    loadProductsWithStock(sucursalId: number | undefined): void {
+        if (!sucursalId) {
+            this.error = 'No se pudo determinar la sucursal';
+            return;
+        }
+
+        // Primero cargar el inventario con stock disponible
+        this.inventoryService.getInventory({ id_sucursal: sucursalId }).subscribe({
+            next: (inventory) => {
+                // Filtrar solo items con stock positivo
+                const itemsWithStock = inventory.filter(item => item.cantidad > 0);
+
+                // Extraer IDs de productos con stock
+                const productIdsWithStock = itemsWithStock.map(item => item.id_producto);
+
+                if (productIdsWithStock.length === 0) {
+                    this.products = [];
+                    this.error = 'No hay productos con stock disponible';
+                    return;
+                }
+
+                // Cargar solo productos activos que tienen stock
+                this.inventoryService.getProducts({ is_active: true }).subscribe({
+                    next: (allProducts) => {
+                        // Filtrar solo productos que tienen stock
+                        this.products = allProducts.filter(product =>
+                            productIdsWithStock.includes(product.id_producto)
+                        );
+                    },
+                    error: (error) => {
+                        this.error = 'Error al cargar los productos';
+                        console.error('Error loading products', error);
+                    }
+                });
             },
             error: (error) => {
-                this.error = 'Error al cargar los productos';
-                console.error('Error loading products', error);
+                this.error = 'Error al verificar inventario';
+                console.error('Error loading inventory', error);
             }
         });
     }

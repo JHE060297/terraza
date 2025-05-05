@@ -1,11 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AuthService } from '../../core/authentication/auth.service';
 import { SucursalService } from '../../core/services/sucursales.service';
 import { InventoryService } from '../../core/services/inventory.service';
 import { Usuario } from '../../core/models/user.model';
 import { LowStockWidgetComponent } from './widget/low-stock-widget/low-stock-widget.component';
 import { sharedImports } from '../../shared/shared.imports';
-import { forkJoin, of } from 'rxjs';
+import { forkJoin, of, Subscription } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { OrdersService } from '../../core/services/orders.service';
 
@@ -16,7 +16,8 @@ import { OrdersService } from '../../core/services/orders.service';
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.scss']
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
+    private subscriptions: Subscription[] = [];
     currentUser: Usuario | null = null;
     isAdmin = false;
     isCajero = false;
@@ -40,21 +41,35 @@ export class DashboardComponent implements OnInit {
     ) { }
 
     ngOnInit(): void {
-        // Suscripción al usuario actual
-        this.authService.currentUser$.subscribe(user => {
+        // Guardar referencia a la suscripción
+        const userSub = this.authService.currentUser$.subscribe(user => {
             this.currentUser = user;
 
-            // Verificar roles
-            this.isAdmin = this.authService.isAdmin();
-            this.isCajero = this.authService.isCajero();
-            this.isMesero = this.authService.isMesero();
+            // Solo cargar datos si hay un usuario autenticado
+            if (user) {
+                // Verificar roles
+                this.isAdmin = this.authService.isAdmin();
+                this.isCajero = this.authService.isCajero();
+                this.isMesero = this.authService.isMesero();
 
-            // Cargar datos según el rol
-            this.loadDashboardData();
+                // Cargar datos según el rol
+                this.loadDashboardData();
+            }
         });
+
+        this.subscriptions.push(userSub);
+    }
+
+    ngOnDestroy(): void {
+        // Limpiar todas las suscripciones al destruir el componente
+        this.subscriptions.forEach(sub => sub.unsubscribe());
     }
 
     loadDashboardData(): void {
+
+        if (!this.authService.isAuthenticated()) {
+            return;
+        }
 
         this.isLoading = true;
 

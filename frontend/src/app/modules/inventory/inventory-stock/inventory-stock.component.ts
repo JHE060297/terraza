@@ -124,6 +124,7 @@ export class InventoryStockComponent implements OnInit {
     }
 
     openAdjustStockDialog(inventoryItem: Inventario) {
+        console.log('Intentando ajustar inventario:', inventoryItem);
         // Verificar que el item tenga un ID válido
         if (!inventoryItem || !inventoryItem.id_inventario) {
             this.snackBar.open('Elemento de inventario inválido', 'Cerrar', {
@@ -131,7 +132,7 @@ export class InventoryStockComponent implements OnInit {
             });
             return;
         }
-    
+
         // Solo admins y cajeros pueden ajustar inventario
         if (!this.isAdmin && !this.isCajero) {
             this.snackBar.open('No tiene permisos para ajustar el inventario', 'Cerrar', {
@@ -139,7 +140,16 @@ export class InventoryStockComponent implements OnInit {
             });
             return;
         }
-    
+
+        if (this.isCajero && !this.isAdmin) {
+            if (inventoryItem.id_sucursal !== this.userBranchId) {
+                this.snackBar.open('Solo puede ajustar inventario de su propia sucursal', 'Cerrar', {
+                    duration: 3000
+                });
+                return;
+            }
+        }
+
         const dialogRef = this.dialog.open(StockAdjustmentDialogComponent, {
             width: '400px',
             data: {
@@ -147,41 +157,41 @@ export class InventoryStockComponent implements OnInit {
                 allowNegative: false
             }
         });
-    
+
         dialogRef.afterClosed().subscribe(result => {
             if (result) {
                 const adjustment: AjusteInventario = {
                     cantidad: result.cantidad,
                     tipo_transaccion: result.tipo_transaccion,
                 };
-    
+
                 console.log('Ajustando inventario:', {
                     id: inventoryItem.id_inventario,
                     adjustment
                 });
-    
+
                 this.inventoryService.adjustInventory(inventoryItem.id_inventario, adjustment)
                     .subscribe({
                         next: (inventory) => {
                             console.log('Respuesta del ajuste:', inventory);
-                            
+
                             this.snackBar.open('Stock ajustado correctamente', 'Cerrar', {
                                 duration: 3000
                             });
-                            
+
                             // Actualizar la cantidad en la tabla
                             inventoryItem.cantidad = inventory.nueva_cantidad;
-                            
+
                             // Recargar datos para actualizar el estado de bajo stock
                             this.loadInventory();
                         },
                         error: (error) => {
                             console.error('Error adjusting stock:', error);
-                            
+
                             const errorMessage = error.error && error.error.error
                                 ? error.error.error
                                 : 'Error al ajustar el stock';
-    
+
                             this.snackBar.open(errorMessage, 'Cerrar', {
                                 duration: 5000
                             });

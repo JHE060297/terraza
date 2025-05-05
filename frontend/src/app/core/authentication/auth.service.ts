@@ -82,6 +82,7 @@ export class AuthService {
     }
 
     logout(): void {
+        // todas las suscripciones de inventario
         this.inventoryService.clearSubscriptions();
 
         // Limpiar localStorage
@@ -95,7 +96,7 @@ export class AuthService {
         // Redirigir a login
         setTimeout(() => {
             this.router.navigate(['/login']);
-        }, 0);
+        }, 100);
     }
 
     refreshToken(): Observable<string> {
