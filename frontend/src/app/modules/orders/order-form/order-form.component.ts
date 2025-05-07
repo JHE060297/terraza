@@ -112,17 +112,29 @@ export class OrderFormComponent implements OnInit {
     }
 
     loadExistingOrder(tableId: number): void {
+        this.isLoading = true
 
         this.ordersService.getOrdersByTable(tableId).subscribe({
             next: (orders) => {
-                const activeOrder = orders.find(o => o.estado !== 'pagado');
-                if (activeOrder) {
-                    this.currentOrder = activeOrder;
-                    this.loadOrderDetails(activeOrder.id_pedido);
+                const activeOrders = orders.filter(o => o.estado !== 'pagado');
+
+                if (activeOrders.length > 0) {
+                    this.currentOrder = activeOrders[0];
+
+
+                    this.loadOrderDetails(this.currentOrder.id_pedido);
+                    this.snackBar.open(`Editando pedido #${this.currentOrder.id_pedido}`, 'Cerrar', {
+                        duration: 3000
+                    })
                 }
+                this.isLoading = false
             },
             error: (error) => {
                 console.error('Error loading existing order', error);
+                this.isLoading = false
+                this.snackBar.open('Error al cargar el pedido existente', 'Cerrar', {
+                    duration: 3000
+                })
             }
         });
     }

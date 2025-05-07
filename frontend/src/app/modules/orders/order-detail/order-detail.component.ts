@@ -52,6 +52,45 @@ export class OrderDetailComponent implements OnInit {
     });
   }
 
+  addProducts(): void {
+    if (!this.order) {
+      this.snackBar.open('No se pudo identificar el pedido para agregar productos', 'Cerrar', {
+        duration: 3000
+      });
+      return;
+    }
+
+    // Verifica si el pedido ya está pagado
+    if (this.order.estado === 'pagado') {
+      this.snackBar.open('No se pueden agregar productos a un pedido ya pagado', 'Cerrar', {
+        duration: 3000
+      });
+      return;
+    }
+
+    // Verifica si el usuario tiene permisos para agregar productos
+    // Los administradores y meseros pueden agregar productos
+    if (!this.authService.isAdmin() && !this.authService.isMesero()) {
+      this.snackBar.open('No tiene permisos para agregar productos al pedido', 'Cerrar', {
+        duration: 3000
+      });
+      return;
+    }
+
+    // Navega al formulario de orden con el ID de la mesa
+    // Esto hará que el formulario cargue el pedido existente
+    this.router.navigate(['/orders/new'], {
+      queryParams: {
+        tableId: this.order.id_mesa
+      }
+    });
+
+    // Opcionalmente, muestra un mensaje informativo
+    this.snackBar.open('Agregando productos al pedido #' + this.order.id_pedido, 'Cerrar', {
+      duration: 2000
+    });
+  }
+
   getStatusLabel(status: string): string {
     switch (status) {
       case 'pendiente': return 'Pendiente';
