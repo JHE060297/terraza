@@ -37,12 +37,8 @@ const generateSalesReport = async (req, res) => {
             ORDER BY ganancia DESC;
         `;
 
-        console.log('Consulta final generada:', query);
-
         // Ejecutar la consulta SQL
         const detalles = await prisma.$queryRaw(query);
-
-        console.log('Detalles obtenidos:', detalles);
 
         // Preparar la respuesta según el formato
         if (formato === 'json') {
@@ -56,8 +52,37 @@ const generateSalesReport = async (req, res) => {
             });
         }
 
+        const detallesLimpios = detalles.map(detalle => ({
+            ...detalle,
+            cantidad_total: Number(detalle.cantidad_total),
+            costo_total: Number(detalle.costo_total),
+            ingreso_total: Number(detalle.ingreso_total),
+            ganancia: Number(detalle.ganancia),
+        }))
+
+        const headers = [
+            'id_producto',
+            'nombre_producto',
+            'cantidad_total',
+            'costo_total',
+            'ingreso_total',
+            'ganancia',
+            'sede',
+        ];
+
+        const encabezados = [
+            'ID Producto',
+            'Nombre Producto',
+            'Cantidad Total',
+            'Costo Total',
+            'Ingreso Total',
+            'Ganancia',
+            'Sede',
+        ]
+
         const wb = XLSX.utils.book_new();
-        const detallesSheet = XLSX.utils.json_to_sheet(detalles);
+        const detallesSheet = XLSX.utils.json_to_sheet(detallesLimpios, { header: headers });
+        XLSX.utils.sheet_add_aoa(detallesSheet, [encabezados], { origin: 'A1' });
         XLSX.utils.book_append_sheet(wb, detallesSheet, 'Detalles');
 
         const buffer = formato === 'xlsx'
