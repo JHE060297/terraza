@@ -123,7 +123,8 @@ const createProduct = async (req, res) => {
         }
 
         // Iniciar una transacción para crear el producto y sus registros de inventario
-        const result = await prisma.$transaction(async (prisma) => {          // 1. Crear el producto
+        const result = await prisma.$transaction(async (prisma) => {
+            // 1. Crear el producto
             const newProduct = await prisma.producto.create({
                 data: {
                     nombre_producto,
@@ -135,15 +136,17 @@ const createProduct = async (req, res) => {
                 }
             });
 
+            // 2. Obtener todas las sucursales existentes
             const sucursales = await prisma.sucursal.findMany();
 
+            // 3. Crear registros de inventario para todas las sucursales
             const inventarioPromises = sucursales.map(sucursal =>
                 prisma.inventario.create({
                     data: {
                         id_producto: newProduct.id_producto,
                         id_sucursal: sucursal.id_sucursal,
                         cantidad: 0,
-                        alerta: 10
+                        alerta: 2 // Valor por defecto
                     }
                 })
             );

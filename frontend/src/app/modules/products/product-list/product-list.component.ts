@@ -60,9 +60,14 @@ export class ProductListComponent implements OnInit {
             });
     }
 
-    toggleInactiveProducts() {
+    applyLowStockFilter() {
         this.showInactiveProducts = !this.showInactiveProducts;
         this.loadProducts();
+    }
+
+    toggleInactiveProducts() {
+        this.showInactiveProducts = !this.showInactiveProducts;
+        this.applyLowStockFilter();
     }
 
     applyFilter(event: Event) {

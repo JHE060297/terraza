@@ -10,7 +10,6 @@ const getAllInventory = async (req, res) => {
     try {
         // Aplicar filtros si existen
         const filters = {};
-        let whereClause = { ...filters };
 
         if (req.query.id_sucursal) {
             filters.id_sucursal = parseInt(req.query.id_sucursal);
@@ -21,6 +20,7 @@ const getAllInventory = async (req, res) => {
         }
 
         // Búsqueda por texto en nombre de producto
+        let whereClause = { ...filters };
         if (req.query.search) {
             const search = req.query.search;
             whereClause = {
@@ -47,13 +47,15 @@ const getAllInventory = async (req, res) => {
             }
         }
 
+        // Obtener inventario existente
         let inventario = await prisma.inventario.findMany({
             where: whereClause,
             orderBy,
             include: {
                 producto: {
                     select: {
-                        nombre_producto: true
+                        nombre_producto: true,
+                        is_active: true
                     }
                 },
                 sucursal: {
@@ -62,99 +64,144 @@ const getAllInventory = async (req, res) => {
                     }
                 }
             }
-        })
+        });
 
+        // Transformar inventario existente
         inventario = inventario.map(item => ({
-            ...item,
+            id_inventario: item.id_inventario,
+            id_producto: item.id_producto,
+            nombre_producto: item.producto.nombre_producto,
+            id_sucursal: item.id_sucursal,
+            nombre_sucursal: item.sucursal.nombre_sucursal,
+            cantidad: item.cantidad,
+            alerta: item.alerta,
             is_low_stock: item.cantidad <= item.alerta
         }));
 
-        // Filtrar low stock después de obtener los datos
+        // Si hay filtros específicos de producto o sucursal, crear registros faltantes
+        if (req.query.id_sucursal || req.query.id_producto) {
+            await ensureInventoryRecords(parseInt(req.query.id_sucursal), parseInt(req.query.id_producto));
+
+            // Volver a obtener los datos después de crear los registros faltantes
+            inventario = await prisma.inventario.findMany({
+                where: whereClause,
+                orderBy,
+                include: {
+                    producto: {
+                        select: {
+                            nombre_producto: true,
+                            is_active: true
+                        }
+                    },
+                    sucursal: {
+                        select: {
+                            nombre_sucursal: true
+                        }
+                    }
+                }
+            });
+
+            inventario = inventario.map(item => ({
+                id_inventario: item.id_inventario,
+                id_producto: item.id_producto,
+                nombre_producto: item.producto.nombre_producto,
+                id_sucursal: item.id_sucursal,
+                nombre_sucursal: item.sucursal.nombre_sucursal,
+                cantidad: item.cantidad,
+                alerta: item.alerta,
+                is_low_stock: item.cantidad <= item.alerta
+            }));
+        }
+
+        // Filtrar por low stock si se solicita
         const is_low_stock = req.query.is_low_stock;
         if (is_low_stock && (is_low_stock === 'true' || is_low_stock === '1' || is_low_stock === 'yes')) {
             inventario = inventario.filter(item => item.is_low_stock);
         }
 
-        // Obtener productos 
-        const productos = await prisma.producto.findMany({
-            where: req.query.search ? {
-                nombre_producto: {
-                    contains: req.query.search
-                }
-            } : undefined,
-            include: {
-                existencias: {
-                    where: filters,
-                    include: {
-                        sucursal: true
-                    }
-                }
-            }
-        });
-
-        // Obtener sucursales
-        const sucursales = await prisma.sucursal.findMany()
-
-        // 3. Crear un inventario combinado que incluya todos los productos para todas las sucursales
-        let inventarioCombinado = [];
-
-        // Para cada producto
-        for (const producto of productos) {
-            // Para cada sucursal
-            for (const sucursal of sucursales) {
-                // Buscar si ya existe un registro de inventario
-                const inventarioExistente = producto.existencias.find(
-                    e => e.id_sucursal === sucursal.id_sucursal
-                );
-
-                if (inventarioExistente) {
-                    // Si existe, añadirlo al inventario combinado
-                    inventarioCombinado.push({
-                        id_inventario: inventarioExistente.id_inventario,
-                        id_producto: producto.id_producto,
-                        nombre_producto: producto.nombre_producto,
-                        id_sucursal: sucursal.id_sucursal,
-                        nombre_sucursal: sucursal.nombre_sucursal,
-                        cantidad: inventarioExistente.cantidad,
-                        alerta: inventarioExistente.alerta,
-                        is_low_stock: inventarioExistente.cantidad <= inventarioExistente.alerta
-                    });
-                } else {
-                    // Si no existe, crear un objeto virtual con cantidad 0
-                    // Solo si no se está filtrando por stock bajo o es_low_stock no es true
-                    if (!is_low_stock || is_low_stock !== 'true') {
-                        inventarioCombinado.push({
-                            id_inventario: null, // Indicador de que es un registro virtual
-                            id_producto: producto.id_producto,
-                            nombre_producto: producto.nombre_producto,
-                            id_sucursal: sucursal.id_sucursal,
-                            nombre_sucursal: sucursal.nombre_sucursal,
-                            cantidad: 0,
-                            alerta: 10, // Valor predeterminado
-                            is_low_stock: true // 0 siempre es menor que cualquier alerta
-                        });
-                    }
-                }
-            }
-        }
-
-        // Aplicar filtros adicionales si es necesario
-        if (req.query.id_sucursal) {
-            inventarioCombinado = inventarioCombinado.filter(
-                item => item.id_sucursal === parseInt(req.query.id_sucursal)
-            );
-        }
-
-        if (req.query.id_producto) {
-            inventarioCombinado = inventarioCombinado.filter(
-                item => item.id_producto === parseInt(req.query.id_producto)
-            );
-        }
-
-        res.json(inventarioCombinado);
+        res.json(inventario);
     } catch (error) {
         console.error('Error en getAllInventory:', error);
         res.status(500).json({ message: 'Error al obtener inventario', error: error.message });
+    }
+};
+
+/**
+ * Función auxiliar para asegurar que existen registros de inventario
+ */
+const ensureInventoryRecords = async (sucursalId, productoId) => {
+    try {
+        if (sucursalId && productoId) {
+            // Caso específico: verificar un producto en una sucursal
+            const existingRecord = await prisma.inventario.findFirst({
+                where: {
+                    id_producto: productoId,
+                    id_sucursal: sucursalId
+                }
+            });
+
+            if (!existingRecord) {
+                await prisma.inventario.create({
+                    data: {
+                        id_producto: productoId,
+                        id_sucursal: sucursalId,
+                        cantidad: 0,
+                        alerta: 2
+                    }
+                });
+            }
+        } else if (sucursalId) {
+            // Crear registros para todos los productos activos en una sucursal
+            const productos = await prisma.producto.findMany({
+                where: { is_active: true }
+            });
+
+            for (const producto of productos) {
+                const existingRecord = await prisma.inventario.findFirst({
+                    where: {
+                        id_producto: producto.id_producto,
+                        id_sucursal: sucursalId
+                    }
+                });
+
+                if (!existingRecord) {
+                    await prisma.inventario.create({
+                        data: {
+                            id_producto: producto.id_producto,
+                            id_sucursal: sucursalId,
+                            cantidad: 0,
+                            alerta: 2
+                        }
+                    });
+                }
+            }
+        } else if (productoId) {
+            // Crear registros para un producto en todas las sucursales
+            const sucursales = await prisma.sucursal.findMany();
+
+            for (const sucursal of sucursales) {
+                const existingRecord = await prisma.inventario.findFirst({
+                    where: {
+                        id_producto: productoId,
+                        id_sucursal: sucursal.id_sucursal
+                    }
+                });
+
+                if (!existingRecord) {
+                    await prisma.inventario.create({
+                        data: {
+                            id_producto: productoId,
+                            id_sucursal: sucursal.id_sucursal,
+                            cantidad: 0,
+                            alerta: 2
+                        }
+                    });
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error en ensureInventoryRecords:', error);
+        throw error;
     }
 };
 
@@ -194,7 +241,7 @@ const getInventoryById = async (req, res) => {
             nombre_sucursal: inventario.sucursal.nombre_sucursal,
             cantidad: inventario.cantidad,
             alerta: inventario.alerta,
-            is_low_stock: inventario.cantidad <= inventario.alerta
+            is_low_stock: inventario.cantidad < inventario.alerta
         };
 
         res.json(transformedInventario);
@@ -387,7 +434,6 @@ const deleteInventory = async (req, res) => {
  */
 const adjustStock = async (req, res) => {
     try {
-
         const { id } = req.params;
         const { cantidad, tipo_transaccion = 'ajuste' } = req.body;
 

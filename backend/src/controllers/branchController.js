@@ -126,21 +126,45 @@ const createBranch = async (req, res) => {
             return res.status(400).json({ message: 'Ya existe una sucursal con ese nombre' });
         }
 
-        // Crear la sucursal
-        const newSucursal = await prisma.sucursal.create({
-            data: {
-                nombre_sucursal,
-                direccion,
-                telefono
-            }
+        // Iniciar una transacción para crear la sucursal y los registros de inventario
+        const result = await prisma.$transaction(async (prisma) => {
+            // Crear la sucursal
+            const newSucursal = await prisma.sucursal.create({
+                data: {
+                    nombre_sucursal,
+                    direccion,
+                    telefono
+                }
+            });
+
+            // Obtener todos los productos activos
+            const productos = await prisma.producto.findMany({
+                where: { is_active: true }
+            });
+
+            // Crear registros de inventario para todos los productos existentes
+            const inventarioPromises = productos.map(producto =>
+                prisma.inventario.create({
+                    data: {
+                        id_producto: producto.id_producto,
+                        id_sucursal: newSucursal.id_sucursal,
+                        cantidad: 0,
+                        alerta: 2 // Valor por defecto
+                    }
+                })
+            );
+
+            await Promise.all(inventarioPromises);
+
+            return newSucursal;
         });
 
         // Transformar los datos para la respuesta
         const transformedSucursal = {
-            id_sucursal: newSucursal.id_sucursal,
-            nombre_sucursal: newSucursal.nombre_sucursal,
-            direccion: newSucursal.direccion,
-            telefono: newSucursal.telefono,
+            id_sucursal: result.id_sucursal,
+            nombre_sucursal: result.nombre_sucursal,
+            direccion: result.direccion,
+            telefono: result.telefono,
             mesas_count: 0
         };
 

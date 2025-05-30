@@ -207,7 +207,7 @@ export class InventoryStockComponent implements OnInit {
 
     getStockStatusClass(item: Inventario): string {
         if (item.is_low_stock) return 'low-stock';
-        if (item.cantidad > item.alerta * 3) return 'good-stock';
+        if (item.cantidad > item.alerta * 2) return 'good-stock';
         return 'medium-stock';
     }
 }
