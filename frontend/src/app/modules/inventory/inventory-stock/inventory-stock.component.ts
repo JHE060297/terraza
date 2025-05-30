@@ -109,9 +109,14 @@ export class InventoryStockComponent implements OnInit {
         this.loadInventory();
     }
 
-    toggleLowStockOnly() {
+    applyLowStockFilter() {
         this.showLowStockOnly = !this.showLowStockOnly;
         this.loadInventory();
+    }
+
+    toggleLowStockOnly() {
+        this.showLowStockOnly = !this.showLowStockOnly;
+        this.applyLowStockFilter();
     }
 
     applyFilter(event: Event) {
