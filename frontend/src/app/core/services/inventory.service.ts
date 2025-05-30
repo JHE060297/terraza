@@ -99,12 +99,6 @@ export class InventoryService {
         // Asegurarse de que la URL y el formato de los datos sean correctos
         const url = `${this.apiUrl}inventario/${id}/adjust_stock/`;
 
-        console.log('Enviando ajuste de inventario:', {
-            url,
-            id,
-            adjustment
-        });
-
         return this.http.post<any>(url, adjustment);
     }
 

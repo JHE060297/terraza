@@ -387,8 +387,6 @@ const deleteInventory = async (req, res) => {
  */
 const adjustStock = async (req, res) => {
     try {
-        console.log('Datos recibidos:', req.body);
-        console.log('ID Inventario:', req.params.id);
 
         const { id } = req.params;
         const { cantidad, tipo_transaccion = 'ajuste' } = req.body;

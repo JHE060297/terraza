@@ -129,7 +129,6 @@ export class InventoryStockComponent implements OnInit {
     }
 
     openAdjustStockDialog(inventoryItem: Inventario) {
-        console.log('Intentando ajustar inventario:', inventoryItem);
         // Verificar que el item tenga un ID válido
         if (!inventoryItem || !inventoryItem.id_inventario) {
             this.snackBar.open('Elemento de inventario inválido', 'Cerrar', {

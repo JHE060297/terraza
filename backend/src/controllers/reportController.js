@@ -9,8 +9,6 @@ const generateSalesReport = async (req, res) => {
         const { fecha_inicio, fecha_fin, id_sucursal, formato = 'xlsx' } = req.body;
         const userId = req.user.user_id;
 
-        console.log('Parametros recibidos:', { fecha_inicio, fecha_fin, id_sucursal, formato });
-
         // Convertir las fechas a formato ISO para asegurar que se manejen correctamente
         const fechaInicioSQL = new Date(fecha_inicio).toISOString().split('T')[0];
         const fechaFinSQL = new Date(fecha_fin).toISOString().split('T')[0];
