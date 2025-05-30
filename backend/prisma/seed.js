@@ -32,7 +32,7 @@ async function main() {
         create: {
             nombre_sucursal: 'Terraza',
             direccion: 'Dg. 81c #72b-78 Tercer piso',
-            telefono: '123456789'
+            telefono: '3058166649'
         }
     });
 
@@ -43,20 +43,20 @@ async function main() {
         where: { nombre: 'administrador' }
     });
 
-    const hashedPassword = await bcrypt.hash('Jhe2390939', 10);
+    const hashedPasswordAdmin = await bcrypt.hash('B4r2025/*', 10)
 
     await prisma.usuario.upsert({
-        where: { usuario: 'JHE0602' },
+        where: { usuario: 'Admin' },
         update: {},
         create: {
-            nombre: 'Jhoan',
-            apellido: 'Aristizabal',
-            usuario: 'JHE0602',
-            contrasena: hashedPassword,
+            nombre: 'Administrador',
+            apellido: 'Sistema',
+            usuario: 'Admin',
+            contrasena: hashedPasswordAdmin,
             id_rol: rolAdmin.id_rol,
             id_sucursal: sucursalPrincipal.id_sucursal,
         }
-    });
+    })
 
     console.log('Usuario administrador creado correctamente');
 
@@ -68,12 +68,12 @@ async function main() {
     const hashedPasswordCajero = await bcrypt.hash('test123', 10);
 
     await prisma.usuario.upsert({
-        where: { usuario: 'serquimedes' },
+        where: { usuario: 'Cajero' },
         update: {},
         create: {
-            nombre: 'Sergio',
-            apellido: 'Mayorga',
-            usuario: 'serquimedes',
+            nombre: 'Cajero',
+            apellido: 'Sistema',
+            usuario: 'Cajero',
             contrasena: hashedPasswordCajero,
             id_rol: rolCajero.id_rol,
             id_sucursal: sucursalPrincipal.id_sucursal,
@@ -90,12 +90,12 @@ async function main() {
     const hashedPasswordMesero = await bcrypt.hash('test123', 10);
 
     await prisma.usuario.upsert({
-        where: { usuario: 'ozman' },
+        where: { usuario: 'mesero' },
         update: {},
         create: {
-            nombre: 'Santiago',
-            apellido: 'Falla',
-            usuario: 'ozman',
+            nombre: 'Mesero',
+            apellido: 'Sistema',
+            usuario: 'mesero',
             contrasena: hashedPasswordMesero,
             id_rol: rolMesero.id_rol,
             id_sucursal: sucursalPrincipal.id_sucursal,
@@ -244,7 +244,7 @@ async function main() {
             data: {
                 id_producto: createdProducto.id_producto,
                 id_sucursal: sucursalPrincipal.id_sucursal,
-                cantidad: 10,
+                cantidad: 5,
                 alerta: 2
             }
         });
@@ -253,6 +253,7 @@ async function main() {
     console.log('Productos e inventario creados correctamente');
 
     console.log('Seeds ejecutados correctamente');
+
 }
 
 main()

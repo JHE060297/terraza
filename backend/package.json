@@ -9,8 +9,7 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
-    "db:seed": "node prisma/seed.js",
-    "db:create-user": "node prisma/create_user.js"
+    "db:seed": "node prisma/seed.js"
   },
   "keywords": [],
   "author": "",
