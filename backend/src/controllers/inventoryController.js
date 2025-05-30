@@ -143,7 +143,7 @@ const createProduct = async (req, res) => {
                         id_producto: newProduct.id_producto,
                         id_sucursal: sucursal.id_sucursal,
                         cantidad: 0,
-                        alerta: 10 
+                        alerta: 10
                     }
                 })
             );
@@ -255,7 +255,6 @@ const updateProduct = async (req, res) => {
 const deleteProduct = async (req, res) => {
     try {
         const { id } = req.params;
-        console.log(`ID del producto a eliminar: ${id}`); // Para depuración
 
         // Verificar si el producto existe
         const existingProduct = await prisma.producto.findUnique({

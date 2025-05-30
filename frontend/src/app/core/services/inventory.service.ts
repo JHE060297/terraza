@@ -48,7 +48,7 @@ export class InventoryService {
     }
 
     updateProduct(id: number, product: Partial<Producto>): Observable<Producto> {
-        return this.http.patch<Producto>(`${this.apiUrl}productos/${id}/`, product);
+        return this.http.put<Producto>(`${this.apiUrl}productos/${id}/`, product);
     }
 
     deleteProduct(id: number): Observable<any> {

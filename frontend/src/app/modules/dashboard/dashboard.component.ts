@@ -12,7 +12,7 @@ import { OrdersService } from '../../core/services/orders.service';
 @Component({
     selector: 'app-dashboard',
     standalone: true,
-    imports: [sharedImports, LowStockWidgetComponent],
+    imports: [sharedImports],
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.scss']
 })
