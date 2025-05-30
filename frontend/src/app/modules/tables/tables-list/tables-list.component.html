@@ -29,7 +29,7 @@
     <mat-card *ngIf="!isLoading && tables.length > 0">
         <mat-card-content>
             <div class="filters-container">
-                <mat-checkbox [(ngModel)]="showInactiveTables" (change)="toggleInactiveTables()">
+                <mat-checkbox [(ngModel)]="showInactiveTables" (change)="applyTableFilter()">
                     Mostrar mesas inactivas
                 </mat-checkbox>
             </div>

@@ -21,6 +21,7 @@ export class MesasListComponent implements OnInit {
     branchId: number;
     branch: Sucursal | null = null;
     tables: Mesa[] = [];
+    allTables: Mesa[] = [];
     isLoading = true;
     error = '';
     showInactiveTables = false;
@@ -72,16 +73,22 @@ export class MesasListComponent implements OnInit {
             )
             .subscribe(result => {
                 this.branch = result.branch;
-                // Filtrar mesas inactivas si es necesario
-                this.tables = this.showInactiveTables
-                    ? result.tables
-                    : result.tables.filter(table => table.is_active);
+                // Guardar todas las mesas sin filtrar
+                this.allTables = result.tables;
+                // Aplicar filtro inicial
+                this.applyTableFilter();
             });
+    }
+
+    applyTableFilter(): void {
+        this.tables = this.showInactiveTables
+            ? this.allTables
+            : this.allTables.filter(table => table.is_active);
     }
 
     toggleInactiveTables(): void {
         this.showInactiveTables = !this.showInactiveTables;
-        this.loadData();
+        this.applyTableFilter();
     }
 
     getTableStatusClass(status: string): string {
@@ -146,6 +153,9 @@ export class MesasListComponent implements OnInit {
         const newTable: Partial<Mesa> = {
             is_active: !table.is_active
         };
+
+        console.log('Toggling table active state:', table.id_mesa, newTable.is_active);
+
 
         this.sucursalService.updateTable(table.id_mesa, newTable).subscribe(
             (updatedTable) => {
