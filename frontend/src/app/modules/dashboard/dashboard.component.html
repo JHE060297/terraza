@@ -71,18 +71,6 @@
         </mat-card>
     </div>
 
-    <!-- Sección de widgets -->
-    <div class="dashboard-widgets" *ngIf="isAdmin || isCajero">
-        <div class="row">
-            <!-- Widget de productos con bajo stock -->
-            <div class="widget-container">
-                <app-low-stock-widget [limit]="5"></app-low-stock-widget>
-            </div>
-
-            <!-- Aquí puedes añadir más widgets en el futuro -->
-        </div>
-    </div>
-
     <!-- Accesos rápidos -->
     <div class="quick-access-section">
         <h2>Acciones Rápidas</h2>
