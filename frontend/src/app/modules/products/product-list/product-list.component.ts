@@ -142,7 +142,7 @@ export class ProductListComponent implements OnInit {
         return 'price-low-margin';
     }
 
-    placeholderImage = 'assets/images/placeholder.png';
+    placeholderImage = 'images/placeholder.png';
     getImageUrl(product: Producto): string {
         if (!product.image) {
             return this.placeholderImage; // Retorna una imagen de placeholder si no hay imagen

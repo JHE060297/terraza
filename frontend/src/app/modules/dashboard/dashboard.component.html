@@ -76,13 +76,7 @@
         <h2>Acciones Rápidas</h2>
 
         <div class="quick-access-buttons">
-            <!-- Para Meseros -->
-            <ng-container *ngIf="isMesero || isAdmin">
-                <button mat-raised-button color="primary" routerLink="/orders/new">
-                    <mat-icon>add_shopping_cart</mat-icon>
-                    Nuevo Pedido
-                </button>
-            </ng-container>
+
 
             <!-- Para Cajeros -->
             <ng-container *ngIf="isCajero || isAdmin">

@@ -286,7 +286,7 @@ const updateTable = async (req, res) => {
             updateData.estado = estado;
         }
 
-        if (is_active !== undefined) updateData.is_active = is_active === 'true';
+        if (is_active !== undefined) updateData.is_active = Boolean(is_active);
 
         // Actualizar la mesa
         const updatedMesa = await prisma.mesa.update({

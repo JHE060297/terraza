@@ -112,7 +112,7 @@ export class TableFormComponent implements OnInit {
         this.tableForm.patchValue({
             numero: table.numero,
             estado: table.estado,
-            is_active: table.is_active
+            is_active: Boolean(table.is_active)
         });
     }
 
@@ -158,4 +158,5 @@ export class TableFormComponent implements OnInit {
     onCancel(): void {
         this.router.navigate(['/branches', this.branchId, 'tables']);
     }
+
 }

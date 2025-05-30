@@ -31,11 +31,6 @@
                     </mat-select>
                 </mat-form-field>
 
-                <!-- Toggle para mostrar mesas inactivas -->
-                <mat-checkbox [(ngModel)]="showInactiveTables" (change)="toggleInactiveTables()">
-                    Mostrar mesas inactivas
-                </mat-checkbox>
-
                 <!-- Botón para refrescar -->
                 <button mat-raised-button color="primary" (click)="loadData()">
                     <mat-icon>refresh</mat-icon> Actualizar
