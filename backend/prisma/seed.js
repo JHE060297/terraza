@@ -65,7 +65,7 @@ async function main() {
         where: { nombre: 'cajero' }
     });
 
-    const hashedPasswordCajero = await bcrypt.hash('test123', 10);
+    const hashedPasswordCajero = await bcrypt.hash('B4r2025/*', 10);
 
     await prisma.usuario.upsert({
         where: { usuario: 'Cajero' },
@@ -87,7 +87,7 @@ async function main() {
         where: { nombre: 'mesero' }
     });
 
-    const hashedPasswordMesero = await bcrypt.hash('test123', 10);
+    const hashedPasswordMesero = await bcrypt.hash('B4r2025/*', 10);
 
     await prisma.usuario.upsert({
         where: { usuario: 'mesero' },
